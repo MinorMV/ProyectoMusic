@@ -1,31 +1,21 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Logic;
 
-import java.time.LocalTime;
-
-/**
- *
- * @author sebas
- */
 public class Cancion {
     private String titulo;
     private String album;
-    private LocalTime duracion;
+    private String duracion; // Cambiado a String en formato mm:ss
     private String genero;
     private Artista artista;
 
     public Cancion() {
         titulo = "";
         album = "";
-        duracion = LocalTime.of(0, 0, 0);
+        duracion = "00:00";
         genero = "";
         artista = null;
     }
 
-    public Cancion(String titulo, String album, LocalTime duracion, String genero) {
+    public Cancion(String titulo, String album, String duracion, String genero) {
         this.titulo = titulo;
         this.album = album;
         this.duracion = duracion;
@@ -33,7 +23,7 @@ public class Cancion {
         this.artista = null;
     }
 
-    public Cancion(String titulo, String album, LocalTime duracion, String genero, Artista artista) {
+    public Cancion(String titulo, String album, String duracion, String genero, Artista artista) {
         this.titulo = titulo;
         this.album = album;
         this.duracion = duracion;
@@ -57,11 +47,11 @@ public class Cancion {
         this.album = album;
     }
 
-    public LocalTime getDuracion() {
+    public String getDuracion() {
         return duracion;
     }
 
-    public void setDuracion(LocalTime duracion) {
+    public void setDuracion(String duracion) {
         this.duracion = duracion;
     }
 
@@ -83,11 +73,10 @@ public class Cancion {
 
     @Override
     public String toString() {
-        return "Titulo: " + titulo + 
-                "\nAlbum: " + album+ 
-                "\nDuracion: " + duracion + " minutos"+ 
-                "\nGenero: " + genero + 
-                (artista != null ? "\nArtista: " + artista.getNombre() : "");
+        return "Titulo: " + titulo +
+               "\nAlbum: " + album +
+               "\nDuracion: " + duracion +
+               "\nGenero: " + genero +
+               (artista != null ? "\nArtista: " + artista.getNombre() : "");
     }
 }
-

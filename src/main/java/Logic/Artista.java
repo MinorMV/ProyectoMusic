@@ -1,30 +1,24 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Logic;
 
-/**
- *
- * @author sebas
- */
 public class Artista {
-
     private String nombre;
     private String genero;
     private String pais;
 
-    public Artista() {
-        nombre = "";
-        genero = "";
-        pais = "";
-    }
+    public Artista() {}
 
     public Artista(String nombre, String genero, String pais) {
         this.nombre = nombre;
         this.genero = genero;
         this.pais = pais;
     }
+    
+public Artista(String nombre) {
+    this.nombre = nombre;
+    this.pais = "";
+    this.genero = "";
+}
+
 
     public String getNombre() {
         return nombre;
@@ -52,9 +46,6 @@ public class Artista {
 
     @Override
     public String toString() {
-        return "Nombre: " + this.getNombre()
-      + "\n" + "Genero: " + this.getGenero()
-           + "\n" + "Pais: " + this.getPais();
-
+        return "Nombre: " + nombre + "\nGénero: " + genero + "\nPaís: " + pais + "\n";
     }
 }

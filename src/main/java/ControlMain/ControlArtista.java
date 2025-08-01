@@ -1,30 +1,65 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package ControlMain;
 
+import DAO.ArtistaDAO;
 import Logic.Artista;
 import View.ViewArtista;
+import java.sql.Connection;
+import javax.swing.JOptionPane;
 
-/**
- *
- * @author sebas
- */
 public class ControlArtista {
 
-    public void capturarDatosArtista(ViewArtista va,Artista ma) {
+    private ArtistaDAO dao;
 
-        va.capturaNombre();
-        ma.setNombre(va.getVnombre());
+    public ControlArtista(Connection conexion) {
+        dao = new ArtistaDAO(conexion);
+    }
 
-        va.capturaGenero();
-        ma.setGenero(va.getVgenero());
+    public void capturarDatosArtista(ViewArtista vista, Artista artista) {
+        artista.setNombre(vista.pedirNombre());
+        artista.setGenero(vista.pedirGenero());
+        artista.setPais(vista.pedirPais());
+        try {
+            dao.insertarArtista(artista);
+            JOptionPane.showMessageDialog(null, "Artista insertado correctamente.");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Error al insertar artista: " + e.getMessage());
+        }
+    }
 
-        va.capturaPais();
-        ma.setPais(va.getVpais());
+    public void buscarYMostrarArtistaPorNombre(ViewArtista vista) {
+        String nombre = vista.pedirNombre();
+        try {
+            Artista artista = dao.buscarArtistaPorNombre(nombre);
+            if (artista != null) {
+                vista.mostrarDatos(artista);
+            } else {
+                JOptionPane.showMessageDialog(null, "No se encontró un artista con ese nombre.");
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Error al buscar artista: " + e.getMessage());
+        }
+    }
 
-        va.mostrarInformacionCompletaArtista();
-                
+    public void modificarArtistaPorNombre(ViewArtista vista) {
+        Artista artista = new Artista();
+        artista.setNombre(vista.pedirNombre());
+        artista.setGenero(vista.pedirGenero());
+        artista.setPais(vista.pedirPais());
+        try {
+            dao.modificarArtista(artista);
+            JOptionPane.showMessageDialog(null, "Artista modificado correctamente.");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Error al modificar artista: " + e.getMessage());
+        }
+    }
+
+    public void eliminarArtistaPorNombre(ViewArtista vista) {
+        String nombre = vista.pedirNombre();
+        try {
+            dao.eliminarArtistaPorNombre(nombre);
+            JOptionPane.showMessageDialog(null, "Artista eliminado correctamente.");
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Error al eliminar artista: " + e.getMessage());
+        }
     }
 }
