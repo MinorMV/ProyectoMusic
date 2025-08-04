@@ -1,7 +1,3 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package DAO;
 
 import Logic.Artista;
@@ -14,11 +10,8 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-/**
- *
- * @author MINOR
- */
 public class PlaylistDAO {
+
     private Connection conexion;
 
     public PlaylistDAO(Connection conexion) {
@@ -34,8 +27,11 @@ public class PlaylistDAO {
             ps.executeUpdate();
         }
 
+        int idPlaylist = obtenerIdPlaylistPorNombre(playlist.getNombre());
+
         for (Cancion cancion : playlist.getCanciones()) {
-            insertarCancionEnPlaylist(playlist.getNombre(), cancion.getTitulo());
+            int idCancion = obtenerIdCancionPorTitulo(cancion.getTitulo());
+            insertarRelacionCancionPlaylist(idPlaylist, idCancion);
         }
     }
 
@@ -65,12 +61,16 @@ public class PlaylistDAO {
     }
 
     public void eliminarPlaylist(String nombrePlaylist) throws SQLException {
-        String sqlIntermedia = "DELETE FROM PLAYLIST_CANCIONES WHERE NOMBRE_PLAYLIST = ?";
+        int idPlaylist = obtenerIdPlaylistPorNombre(nombrePlaylist);
+
+        // Eliminar relaciones con canciones
+        String sqlIntermedia = "DELETE FROM CANCIONES_PLAYLIST WHERE ID_PLAYLIST = ?";
         try (PreparedStatement ps = conexion.prepareStatement(sqlIntermedia)) {
-            ps.setString(1, nombrePlaylist);
+            ps.setInt(1, idPlaylist);
             ps.executeUpdate();
         }
 
+        // Eliminar la playlist
         String sql = "DELETE FROM PLAYLISTS WHERE NOMBRE = ?";
         try (PreparedStatement ps = conexion.prepareStatement(sql)) {
             ps.setString(1, nombrePlaylist);
@@ -78,42 +78,66 @@ public class PlaylistDAO {
         }
     }
 
-    // Métodos auxiliares
+    // ========================================
+    // MÉTODOS AUXILIARES
+    // ========================================
 
     private int obtenerIdUsuarioPorNombre(String nombreUsuario) throws SQLException {
         String sql = "SELECT ID_USUARIO FROM USUARIOS WHERE NOMBRE = ?";
         try (PreparedStatement ps = conexion.prepareStatement(sql)) {
             ps.setString(1, nombreUsuario);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) {
-                    return rs.getInt("ID_USUARIO");
-                } else {
-                    throw new SQLException("Usuario no encontrado: " + nombreUsuario);
-                }
+                if (rs.next()) return rs.getInt("ID_USUARIO");
+                else throw new SQLException("Usuario no encontrado: " + nombreUsuario);
             }
         }
     }
 
-    private void insertarCancionEnPlaylist(String nombrePlaylist, String tituloCancion) throws SQLException {
-        String sql = "INSERT INTO PLAYLIST_CANCIONES (NOMBRE_PLAYLIST, TITULO_CANCION) VALUES (?, ?)";
+    private int obtenerIdPlaylistPorNombre(String nombre) throws SQLException {
+        String sql = "SELECT ID_PLAYLIST FROM PLAYLISTS WHERE NOMBRE = ?";
         try (PreparedStatement ps = conexion.prepareStatement(sql)) {
-            ps.setString(1, nombrePlaylist);
-            ps.setString(2, tituloCancion);
+            ps.setString(1, nombre);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt("ID_PLAYLIST");
+                else throw new SQLException("Playlist no encontrada: " + nombre);
+            }
+        }
+    }
+
+    private int obtenerIdCancionPorTitulo(String titulo) throws SQLException {
+        String sql = "SELECT ID_CANCION FROM CANCIONES WHERE TRIM(UPPER(TITULO)) = TRIM(UPPER(?))";
+        try (PreparedStatement ps = conexion.prepareStatement(sql)) {
+            ps.setString(1, titulo);
+            try (ResultSet rs = ps.executeQuery()) {
+                if (rs.next()) return rs.getInt("ID_CANCION");
+                else throw new SQLException("Canción no encontrada: " + titulo);
+            }
+        }
+    }
+
+    private void insertarRelacionCancionPlaylist(int idPlaylist, int idCancion) throws SQLException {
+        String sql = "INSERT INTO CANCIONES_PLAYLIST (ID_PLAYLIST, ID_CANCION) VALUES (?, ?)";
+        try (PreparedStatement ps = conexion.prepareStatement(sql)) {
+            ps.setInt(1, idPlaylist);
+            ps.setInt(2, idCancion);
             ps.executeUpdate();
         }
     }
 
     private ArrayList<Cancion> obtenerCancionesDePlaylist(String nombrePlaylist) throws SQLException {
         ArrayList<Cancion> canciones = new ArrayList<>();
+        int idPlaylist = obtenerIdPlaylistPorNombre(nombrePlaylist);
+
         String sql = """
             SELECT C.TITULO, C.ALBUM, C.DURACION, C.GENERO, A.NOMBRE AS NOMBRE_ARTISTA
-            FROM PLAYLIST_CANCIONES PC
-            JOIN CANCIONES C ON PC.TITULO_CANCION = C.TITULO
+            FROM CANCIONES_PLAYLIST CP
+            JOIN CANCIONES C ON CP.ID_CANCION = C.ID_CANCION
             JOIN ARTISTAS A ON C.ID_ARTISTA = A.ID_ARTISTA
-            WHERE PC.NOMBRE_PLAYLIST = ?
+            WHERE CP.ID_PLAYLIST = ?
         """;
+
         try (PreparedStatement ps = conexion.prepareStatement(sql)) {
-            ps.setString(1, nombrePlaylist);
+            ps.setInt(1, idPlaylist);
             try (ResultSet rs = ps.executeQuery()) {
                 while (rs.next()) {
                     Cancion c = new Cancion();
@@ -126,6 +150,7 @@ public class PlaylistDAO {
                 }
             }
         }
+
         return canciones;
     }
 }

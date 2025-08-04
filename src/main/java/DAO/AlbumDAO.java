@@ -1,20 +1,13 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package DAO;
 
 import Logic.Album;
 import Logic.Artista;
+import Logic.Cancion;
 import java.sql.Connection;
 import java.sql.Date;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 
-/**
- *
- * @author MINOR
- */
 public class AlbumDAO {
 
     private Connection conexion;
@@ -35,6 +28,14 @@ public class AlbumDAO {
         ps.setInt(5, idArtista);
 
         ps.executeUpdate();
+        ps.close();
+
+        int idAlbum = obtenerIdAlbumPorNombre(album.getAlbumNombre());
+
+        for (Cancion cancion : album.getCanciones()) {
+            int idCancion = obtenerIdCancionPorTitulo(cancion.getTitulo());
+            insertarRelacionAlbumCancion(idAlbum, idCancion);
+        }
     }
 
     public Album buscarAlbumPorNombre(String nombre) throws Exception {
@@ -58,6 +59,7 @@ public class AlbumDAO {
     }
 
     public void modificarAlbum(Album album) throws Exception {
+        // 1. Actualizar datos del álbum
         String sql = "UPDATE ALBUMES SET FECHA_CREACION = ?, GENERO = ?, DESCARGAS = ?, ID_ARTISTA = ? WHERE NOMBRE = ?";
         PreparedStatement ps = conexion.prepareStatement(sql);
         ps.setDate(1, Date.valueOf(album.getFechaCreacion()));
@@ -66,10 +68,21 @@ public class AlbumDAO {
 
         int idArtista = obtenerIdArtistaPorNombre(album.getArtista().getNombre());
         ps.setInt(4, idArtista);
-
         ps.setString(5, album.getAlbumNombre());
-
         ps.executeUpdate();
+        ps.close();
+
+        // 2. Obtener el ID del álbum
+        int idAlbum = obtenerIdAlbumPorNombre(album.getAlbumNombre());
+
+        // 3. Eliminar canciones antiguas del álbum
+        eliminarRelacionesAlbumCancion(idAlbum);
+
+        // 4. Insertar nuevas canciones asociadas
+        for (Cancion cancion : album.getCanciones()) {
+            int idCancion = obtenerIdCancionPorTitulo(cancion.getTitulo());
+            insertarRelacionAlbumCancion(idAlbum, idCancion);
+        }
     }
 
     public void eliminarAlbumPorNombre(String nombre) throws Exception {
@@ -90,5 +103,46 @@ public class AlbumDAO {
         } else {
             throw new Exception("No se encontró el artista con nombre: " + nombre);
         }
+    }
+
+    private int obtenerIdAlbumPorNombre(String nombre) throws Exception {
+        String sql = "SELECT ID_ALBUM FROM ALBUMES WHERE NOMBRE = ?";
+        PreparedStatement ps = conexion.prepareStatement(sql);
+        ps.setString(1, nombre);
+        ResultSet rs = ps.executeQuery();
+
+        if (rs.next()) {
+            return rs.getInt("ID_ALBUM");
+        } else {
+            throw new Exception("No se encontró el álbum con nombre: " + nombre);
+        }
+    }
+
+    public int obtenerIdCancionPorTitulo(String titulo) throws Exception {
+        String sql = "SELECT ID_CANCION FROM CANCIONES WHERE TRIM(UPPER(TITULO)) = TRIM(UPPER(?))";
+        PreparedStatement ps = conexion.prepareStatement(sql);
+        ps.setString(1, titulo);
+        ResultSet rs = ps.executeQuery();
+
+        if (rs.next()) {
+            return rs.getInt("ID_CANCION");
+        } else {
+            throw new Exception("No se encontró la canción con título: " + titulo);
+        }
+    }
+
+    private void insertarRelacionAlbumCancion(int idAlbum, int idCancion) throws Exception {
+        String sql = "INSERT INTO ALBUM_CANCION (ID_ALBUM, ID_CANCION) VALUES (?, ?)";
+        PreparedStatement ps = conexion.prepareStatement(sql);
+        ps.setInt(1, idAlbum);
+        ps.setInt(2, idCancion);
+        ps.executeUpdate();
+    }
+
+    private void eliminarRelacionesAlbumCancion(int idAlbum) throws Exception {
+        String sql = "DELETE FROM ALBUM_CANCION WHERE ID_ALBUM = ?";
+        PreparedStatement ps = conexion.prepareStatement(sql);
+        ps.setInt(1, idAlbum);
+        ps.executeUpdate();
     }
 }

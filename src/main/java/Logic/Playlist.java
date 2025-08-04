@@ -1,15 +1,7 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- * Click nbfs://nbhost/SystemFileSystem/Templates/Classes/Class.java to edit this template
- */
 package Logic;
 
 import java.util.ArrayList;
 
-/**
- *
- * @author sebas
- */
 public class Playlist {
 
     private String nombre;
@@ -46,6 +38,14 @@ public class Playlist {
 
     public ArrayList<Cancion> getCanciones() {
         return canciones;
+    }
+
+    // ✅ Método agregado para corregir el error
+    public void setCanciones(ArrayList<Cancion> canciones) {
+        this.canciones.clear();
+        if (canciones != null) {
+            this.canciones.addAll(canciones);
+        }
     }
 
     public void agregarCancion(Cancion cancion) {

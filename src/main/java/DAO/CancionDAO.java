@@ -16,7 +16,7 @@ public class CancionDAO {
         try (PreparedStatement ps = conexion.prepareStatement(sql)) {
             ps.setString(1, cancion.getTitulo());
             ps.setString(2, cancion.getAlbum());
-            ps.setString(3, cancion.getDuracion()); // ahora es String
+            ps.setString(3, cancion.getDuracion()); 
             ps.setString(4, cancion.getGenero());
 
             int idArtista = obtenerIdArtistaPorNombre(cancion.getArtista().getNombre());
@@ -35,7 +35,7 @@ public class CancionDAO {
                     Cancion c = new Cancion();
                     c.setTitulo(rs.getString("TITULO"));
                     c.setAlbum(rs.getString("ALBUM"));
-                    c.setDuracion(rs.getString("DURACION")); // ahora es String
+                    c.setDuracion(rs.getString("DURACION")); 
                     c.setGenero(rs.getString("GENERO"));
                     c.setArtista(new Logic.Artista(rs.getString("NOMBRE_ARTISTA")));
                     return c;

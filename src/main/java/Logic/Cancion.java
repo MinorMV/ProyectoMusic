@@ -3,7 +3,7 @@ package Logic;
 public class Cancion {
     private String titulo;
     private String album;
-    private String duracion; // Cambiado a String en formato mm:ss
+    private String duracion; 
     private String genero;
     private Artista artista;
 
