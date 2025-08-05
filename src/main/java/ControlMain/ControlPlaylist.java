@@ -4,9 +4,14 @@
  */
 package ControlMain;
 
+import DAO.PlaylistDAO;
 import Logic.Playlist;
 import Logic.Usuario;
 import View.ViewPlaylist;
+import java.awt.HeadlessException;
+import java.sql.Connection;
+import java.sql.SQLException;
+import javax.swing.JOptionPane;
 
 /**
  *
@@ -14,21 +19,60 @@ import View.ViewPlaylist;
  */
 public class ControlPlaylist {
 
-    public void capturarDatosPlaylist(ViewPlaylist vp, Playlist mp) {
-        
-        // Captura nombre de la playlist desde la vista
-        vp.capturaNombrePlaylist();
-        mp.setNombre(vp.getVnombrePlaylist());
+    private PlaylistDAO dao;
 
-        // Captura nombre del usuario (solo nombre, no el objeto completo)
-        vp.capturaNombreUsuario();
+    public ControlPlaylist(Connection conexion) {
+        dao = new PlaylistDAO(conexion);
+    }
 
-        // Creamos el modelo de Usuario y le asignamos el nombre
-        Usuario nuevoUsuario = new Usuario();
-        nuevoUsuario.setNombre(vp.getVnombreUsuario());
-        mp.setUsuario(nuevoUsuario);
+    public void capturarDatosPlaylist(ViewPlaylist vista, Playlist playlist) {
+        vista.capturaNombrePlaylist();
+        vista.capturaNombreUsuario();
 
-        // Mostrar la información completa de la playlist
-        vp.mostrarInformacionCompletaPlaylist();
+        // Construcción de objeto Usuario asociado
+        Usuario usuario = new Usuario();
+        usuario.setNombre(vista.getVnombreUsuario());
+
+        // Seteo de atributos en la playlist
+        playlist.setNombre(vista.getVnombrePlaylist());
+        playlist.setUsuario(usuario);
+
+        try {
+            dao.insertarPlaylist(playlist);
+            JOptionPane.showMessageDialog(null, "Playlist insertada correctamente.");
+        } catch (HeadlessException | SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al insertar playlist: " + e.getMessage());
+        }
+    }
+
+    public void buscarYMostrarPlaylistPorNombre(ViewPlaylist vista) {
+        vista.capturaNombrePlaylist();
+        String nombre = vista.getVnombrePlaylist();
+
+        try {
+            Playlist playlist = dao.buscarPorNombre(nombre);
+            if (playlist != null) {
+                vista.setVnombrePlaylist(playlist.getNombre());
+                vista.setVnombreUsuario(playlist.getUsuario().getNombre());
+                vista.mostrarInformacionCompletaPlaylist();
+            } else {
+                JOptionPane.showMessageDialog(null, "No se encontró una playlist con ese nombre.");
+            }
+        } catch (HeadlessException | SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al buscar playlist: " + e.getMessage());
+        }
+    }
+
+    public void eliminarPlaylistPorNombre(ViewPlaylist vista) {
+        vista.capturaNombrePlaylist();
+        String nombre = vista.getVnombrePlaylist();
+
+        try {
+            dao.eliminarPlaylist(nombre);
+            JOptionPane.showMessageDialog(null, "Playlist eliminada correctamente.");
+        } catch (HeadlessException | SQLException e) {
+            JOptionPane.showMessageDialog(null, "Error al eliminar playlist: " + e.getMessage());
+        }
     }
 }
+
