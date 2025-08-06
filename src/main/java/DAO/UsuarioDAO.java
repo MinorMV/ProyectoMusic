@@ -1,70 +1,69 @@
+// ===== DAO/UsuarioDAO.java =====
 package DAO;
 
 import Logic.Usuario;
+import java.sql.CallableStatement;
 import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.SQLException;
 
 public class UsuarioDAO {
-
     private final Connection con;
 
     public UsuarioDAO(Connection con) {
         this.con = con;
     }
 
-    public boolean insertarUsuario(Usuario usuario) {
-        String sql = "INSERT INTO USUARIOS (nombre, correo, contrasena) VALUES (?, ?, ?)";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, usuario.getNombre());
-            ps.setString(2, usuario.getCorreo());
-            ps.setString(3, usuario.getContrasena());
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            System.out.println("Error al insertar usuario: " + e.getMessage());
-            return false;
+    public void insertar(Usuario usuario) throws SQLException {
+        String sql = "{call INSERTAR_USUARIO(?, ?, ?, ?)}";
+        try (CallableStatement cs = con.prepareCall(sql)) {
+            cs.setString(1, usuario.getNombre());
+            cs.setString(2, usuario.getCorreo());
+            cs.setString(3, usuario.getContrasena());
+            cs.setString(4, usuario.getPais());
+            cs.execute();
         }
     }
 
-    public Usuario buscarUsuarioPorCorreo(String correo) {
-        String sql = "SELECT * FROM USUARIOS WHERE correo = ?";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, correo);
-            ResultSet rs = ps.executeQuery();
-            if (rs.next()) {
-                Usuario u = new Usuario();
-                u.setNombre(rs.getString("nombre"));
-                u.setCorreo(rs.getString("correo"));
-                u.setContrasena(rs.getString("contrasena"));
-                return u;
-            }
-        } catch (Exception e) {
-            System.out.println("Error al buscar usuario: " + e.getMessage());
-        }
-        return null;
-    }
+    public Usuario buscar(String correo) throws SQLException {
+        String sql = "{call BUSCAR_USUARIO_POR_CORREO(?, ?, ?, ?)}";
+        try (CallableStatement cs = con.prepareCall(sql)) {
+            cs.setString(1, correo);
+            cs.registerOutParameter(2, java.sql.Types.VARCHAR);
+            cs.registerOutParameter(3, java.sql.Types.VARCHAR);
+            cs.registerOutParameter(4, java.sql.Types.VARCHAR);
+            cs.execute();
 
-    public boolean modificarUsuario(Usuario usuario) {
-        String sql = "UPDATE USUARIOS SET nombre = ?, contrasena = ? WHERE correo = ?";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, usuario.getNombre());
-            ps.setString(2, usuario.getContrasena());
-            ps.setString(3, usuario.getCorreo());
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            System.out.println("Error al modificar usuario: " + e.getMessage());
-            return false;
+            String nombre = cs.getString(2);
+            String contrasena = cs.getString(3);
+            String pais = cs.getString(4);
+
+            if (nombre == null) return null;
+
+            Usuario u = new Usuario();
+            u.setCorreo(correo);
+            u.setNombre(nombre);
+            u.setContrasena(contrasena);
+            u.setPais(pais);
+            return u;
         }
     }
 
-    public boolean eliminarUsuarioPorCorreo(String correo) {
-        String sql = "DELETE FROM USUARIOS WHERE correo = ?";
-        try (PreparedStatement ps = con.prepareStatement(sql)) {
-            ps.setString(1, correo);
-            return ps.executeUpdate() > 0;
-        } catch (Exception e) {
-            System.out.println("Error al eliminar usuario: " + e.getMessage());
-            return false;
+    public void modificar(Usuario usuario) throws SQLException {
+        String sql = "{call MODIFICAR_USUARIO(?, ?, ?, ?)}";
+        try (CallableStatement cs = con.prepareCall(sql)) {
+            cs.setString(1, usuario.getCorreo());
+            cs.setString(2, usuario.getNombre());
+            cs.setString(3, usuario.getContrasena());
+            cs.setString(4, usuario.getPais());
+            cs.execute();
+        }
+    }
+
+    public void eliminar(String correo) throws SQLException {
+        String sql = "{call ELIMINAR_USUARIO(?)}";
+        try (CallableStatement cs = con.prepareCall(sql)) {
+            cs.setString(1, correo);
+            cs.execute();
         }
     }
 }

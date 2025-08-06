@@ -1,57 +1,69 @@
 package DAO;
 
 import Logic.Artista;
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
+import java.sql.*;
+import oracle.jdbc.OracleTypes;
 
 public class ArtistaDAO {
 
-    private Connection conexion;
+    private final Connection conexion;
 
     public ArtistaDAO(Connection conexion) {
         this.conexion = conexion;
     }
 
-    public void insertarArtista(Artista artista) throws Exception {
-        String sql = "INSERT INTO ARTISTAS (NOMBRE, GENERO, PAIS) VALUES (?, ?, ?)";
-        PreparedStatement ps = conexion.prepareStatement(sql);
-        ps.setString(1, artista.getNombre());
-        ps.setString(2, artista.getGenero());
-        ps.setString(3, artista.getPais());
-        ps.executeUpdate();
-    }
-
-    public Artista buscarArtistaPorNombre(String nombre) throws Exception {
-        String sql = "SELECT * FROM ARTISTAS WHERE NOMBRE = ?";
-        PreparedStatement ps = conexion.prepareStatement(sql);
-        ps.setString(1, nombre);
-        ResultSet rs = ps.executeQuery();
-
-        if (rs.next()) {
-            Artista artista = new Artista();
-            artista.setNombre(rs.getString("nombre"));
-            artista.setGenero(rs.getString("genero"));
-            artista.setPais(rs.getString("pais"));
-            return artista;
-        } else {
-            return null;
+    public boolean insertarArtista(Artista artista) {
+        try (CallableStatement cs = conexion.prepareCall("{call insertar_artista(?, ?, ?)}")) {
+            cs.setString(1, artista.getNombre());
+            cs.setString(2, artista.getGenero());
+            cs.setString(3, artista.getPais());
+            cs.execute();
+            return true;
+        } catch (SQLException e) {
+            return false;
         }
     }
 
-    public void modificarArtista(Artista artista) throws Exception {
-        String sql = "UPDATE ARTISTAS SET GENERO = ?, PAIS = ? WHERE NOMBRE = ?";
-        PreparedStatement ps = conexion.prepareStatement(sql);
-        ps.setString(1, artista.getGenero());
-        ps.setString(2, artista.getPais());
-        ps.setString(3, artista.getNombre());
-        ps.executeUpdate();
+    public Artista buscarArtistaPorNombre(String nombre) {
+        try (CallableStatement cs = conexion.prepareCall("{ ? = call buscar_artista(?) }")) {
+            cs.registerOutParameter(1, OracleTypes.CURSOR);
+            cs.setString(2, nombre);
+            cs.execute();
+
+            ResultSet rs = (ResultSet) cs.getObject(1);
+            if (rs.next()) {
+                Artista artista = new Artista();
+                artista.setIdArtista(rs.getInt("ID_ARTISTA"));
+                artista.setNombre(rs.getString("NOMBRE"));
+                artista.setGenero(rs.getString("GENERO"));
+                artista.setPais(rs.getString("PAIS"));
+                return artista;
+            }
+        } catch (SQLException e) {
+            return null;
+        }
+        return null;
     }
 
-    public void eliminarArtistaPorNombre(String nombre) throws Exception {
-        String sql = "DELETE FROM ARTISTAS WHERE NOMBRE = ?";
-        PreparedStatement ps = conexion.prepareStatement(sql);
-        ps.setString(1, nombre);
-        ps.executeUpdate();
+    public boolean modificarArtista(Artista artista) {
+        try (CallableStatement cs = conexion.prepareCall("{call modificar_artista(?, ?, ?)}")) {
+            cs.setString(1, artista.getNombre());
+            cs.setString(2, artista.getGenero());
+            cs.setString(3, artista.getPais());
+            cs.execute();
+            return true;
+        } catch (SQLException e) {
+            return false;
+        }
+    }
+
+    public boolean eliminarArtistaPorNombre(String nombre) {
+        try (CallableStatement cs = conexion.prepareCall("{call eliminar_artista(?)}")) {
+            cs.setString(1, nombre);
+            cs.execute();
+            return true;
+        } catch (SQLException e) {
+            return false;
+        }
     }
 }

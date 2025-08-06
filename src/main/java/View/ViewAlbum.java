@@ -19,34 +19,35 @@ public class ViewAlbum {
         vcanciones = new ArrayList<>();
     }
 
-    public void mostrarAlbumNombre() {
-        JOptionPane.showMessageDialog(null, "Nombre del Album: " + getValbumNombre());
+    // ✅ Mensaje de éxito
+    public void mostrarMensajeExito(String mensaje) {
+        JOptionPane.showMessageDialog(null, mensaje, "Éxito", JOptionPane.INFORMATION_MESSAGE);
     }
 
-    public void mostrarFechaCreacion() {
-        JOptionPane.showMessageDialog(null, "Fecha de creación: " + getVfechaCreacion());
+    // ✅ Mensaje de error simple
+    public void mostrarMensajeError(String mensaje) {
+        JOptionPane.showMessageDialog(null, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
     }
 
-    public void mostrarGenero() {
-        JOptionPane.showMessageDialog(null, "Género del Album: " + getVgenero());
+    // ✅ Manejo de excepciones con detalle
+    public void mostrarError(Exception e) {
+        String tipo = e.getClass().getSimpleName();
+        String detalle = e.getMessage();
+
+        StringBuilder mensaje = new StringBuilder("Ocurrió un error durante la operación.\n\n");
+        mensaje.append("Tipo de error: ").append(tipo).append("\n");
+        mensaje.append("Detalle: ").append(detalle);
+
+        JOptionPane.showMessageDialog(null, mensaje.toString(), "Error", JOptionPane.ERROR_MESSAGE);
     }
 
-    public void mostrarDescargas() {
-        JOptionPane.showMessageDialog(null, "Cantidad de Descargas: " + getVdescargas());
+    // ✅ Confirmación para eliminar/modificar
+    public boolean confirmarAccion(String mensaje) {
+        int opcion = JOptionPane.showConfirmDialog(null, mensaje, "Confirmar", JOptionPane.YES_NO_OPTION);
+        return opcion == JOptionPane.YES_OPTION;
     }
 
-    public void mostrarArtista() {
-        JOptionPane.showMessageDialog(null, "Artista del Album: " + (vartista != null ? vartista.getNombre() : "No definido"));
-    }
-
-    public void mostrarCanciones() {
-        StringBuilder canciones = new StringBuilder("Canciones del álbum:\n");
-        for (Cancion c : vcanciones) {
-            canciones.append("- ").append(c.getTitulo()).append("\n");
-        }
-        JOptionPane.showMessageDialog(null, canciones.toString());
-    }
-
+    // ✅ Captura de datos
     public void capturaAlbumNombre() {
         do {
             valbumNombre = JOptionPane.showInputDialog(null, "Digite el nombre del Álbum:", "Álbum", JOptionPane.INFORMATION_MESSAGE);
@@ -60,18 +61,22 @@ public class ViewAlbum {
             int anio = Integer.parseInt(JOptionPane.showInputDialog(null, "Año de creación:", "Fecha", JOptionPane.INFORMATION_MESSAGE));
             vfechaCreacion = LocalDate.of(anio, mes, dia);
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Fecha inválida. Se usará la fecha actual.");
+            mostrarError(new IllegalArgumentException("Fecha inválida. Se usará la fecha actual."));
             vfechaCreacion = LocalDate.now();
         }
     }
 
     public void capturaGenero() {
-        vgenero = JOptionPane.showInputDialog(null, "Digite el género del Álbum:", "Álbum", JOptionPane.INFORMATION_MESSAGE);
+        vgenero = JOptionPane.showInputDialog(null, "Digite el género del Álbum:", "Género", JOptionPane.INFORMATION_MESSAGE);
+        if (vgenero == null || vgenero.trim().isEmpty()) {
+            vgenero = "Desconocido";
+        }
     }
 
     public void capturaDescargas() {
         try {
-            vdescargas = Integer.parseInt(JOptionPane.showInputDialog(null, "Cantidad de descargas:", "Álbum", JOptionPane.INFORMATION_MESSAGE));
+            String input = JOptionPane.showInputDialog(null, "Cantidad de descargas:", "Descargas", JOptionPane.INFORMATION_MESSAGE);
+            vdescargas = Integer.parseInt(input);
         } catch (Exception e) {
             vdescargas = 0;
         }
@@ -87,25 +92,23 @@ public class ViewAlbum {
     }
 
     public void capturaCanciones() {
-    boolean seguir = true;
+        boolean seguir = true;
+        while (seguir) {
+            String titulo = JOptionPane.showInputDialog(null, "Ingrese el título de la canción:", "Canción del Álbum", JOptionPane.INFORMATION_MESSAGE);
+            if (titulo != null && !titulo.trim().isEmpty()) {
+                Cancion nueva = new Cancion();
+                nueva.setTitulo(titulo.trim());
+                vcanciones.add(nueva);
+            }
 
-    while (seguir) {
-        String titulo = JOptionPane.showInputDialog(null, "Ingrese el título de la canción:", "Canción del Álbum", JOptionPane.INFORMATION_MESSAGE);
-
-        if (titulo != null && !titulo.trim().isEmpty()) {
-            Cancion nueva = new Cancion();      
-            nueva.setTitulo(titulo.trim());     
-            vcanciones.add(nueva);              
-        }
-
-        int opcion = JOptionPane.showConfirmDialog(null, "¿Desea agregar otra canción?", "Continuar", JOptionPane.YES_NO_OPTION);
-        if (opcion != JOptionPane.YES_OPTION) {
-            seguir = false;
+            int opcion = JOptionPane.showConfirmDialog(null, "¿Desea agregar otra canción?", "Continuar", JOptionPane.YES_NO_OPTION);
+            if (opcion != JOptionPane.YES_OPTION) {
+                seguir = false;
+            }
         }
     }
-}
 
-
+    // ✅ Mostrar datos del álbum
     public void mostrarinformacionAlbum() {
         StringBuilder mensaje = new StringBuilder();
         mensaje.append("------ ALBUM ------\n");
@@ -119,9 +122,40 @@ public class ViewAlbum {
             mensaje.append("- ").append(c.getTitulo()).append("\n");
         }
         mensaje.append("--------------------");
+
         JOptionPane.showMessageDialog(null, mensaje.toString(), "Información del Álbum", JOptionPane.INFORMATION_MESSAGE);
     }
 
+    // ✅ Métodos individuales para mostrar datos
+    public void mostrarAlbumNombre() {
+        JOptionPane.showMessageDialog(null, "Nombre del Álbum: " + getValbumNombre());
+    }
+
+    public void mostrarFechaCreacion() {
+        JOptionPane.showMessageDialog(null, "Fecha de creación: " + getVfechaCreacion());
+    }
+
+    public void mostrarGenero() {
+        JOptionPane.showMessageDialog(null, "Género del Álbum: " + getVgenero());
+    }
+
+    public void mostrarDescargas() {
+        JOptionPane.showMessageDialog(null, "Cantidad de Descargas: " + getVdescargas());
+    }
+
+    public void mostrarArtista() {
+        JOptionPane.showMessageDialog(null, "Artista del Álbum: " + (vartista != null ? vartista.getNombre() : "No definido"));
+    }
+
+    public void mostrarCanciones() {
+        StringBuilder canciones = new StringBuilder("Canciones del álbum:\n");
+        for (Cancion c : vcanciones) {
+            canciones.append("- ").append(c.getTitulo()).append("\n");
+        }
+        JOptionPane.showMessageDialog(null, canciones.toString());
+    }
+
+    // ✅ Getters y Setters
     public String getValbumNombre() {
         return valbumNombre;
     }

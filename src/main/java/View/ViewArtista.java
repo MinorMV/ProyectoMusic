@@ -18,6 +18,28 @@ public class ViewArtista {
     }
 
     public void mostrarDatos(Artista artista) {
-        JOptionPane.showMessageDialog(null, artista.toString());
+        String info = "----- ARTISTA -----\n"
+                + "ID: " + artista.getIdArtista() + "\n"
+                + "Nombre: " + artista.getNombre() + "\n"
+                + "Género: " + artista.getGenero() + "\n"
+                + "País: " + artista.getPais();
+        JOptionPane.showMessageDialog(null, info, "Información del Artista", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public void mostrarMensajeExito(String mensaje) {
+        JOptionPane.showMessageDialog(null, mensaje, "Éxito", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public void mostrarMensajeError(String mensaje) {
+        JOptionPane.showMessageDialog(null, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    public void mostrarError(Exception e) {
+        JOptionPane.showMessageDialog(null, "Error inesperado: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    public boolean confirmarAccion(String mensaje) {
+        int opcion = JOptionPane.showConfirmDialog(null, mensaje, "Confirmar", JOptionPane.YES_NO_OPTION);
+        return opcion == JOptionPane.YES_OPTION;
     }
 }

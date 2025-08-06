@@ -1,5 +1,7 @@
+// ===== View/ViewUsuario.java =====
 package View;
 
+import Logic.Usuario;
 import javax.swing.JOptionPane;
 
 public class ViewUsuario {
@@ -7,62 +9,58 @@ public class ViewUsuario {
     private String vnombre;
     private String vcorreo;
     private String vcontrasena;
-
-    public void mostrarNombre() {
-        JOptionPane.showMessageDialog(null, "El nombre elegido para el usuario es: " + getVnombre());
-    }
-
-    public void mostrarCorreo() {
-        JOptionPane.showMessageDialog(null, "El correo de la cuenta es: " + getVcorreo());
-    }
-
-    public void mostrarContrasena() {
-        JOptionPane.showMessageDialog(null, "La contraseña ha sido elegida exitosamente.");
-    }
+    private String vpais;
 
     public void capturaNombre() {
-        setVnombre(JOptionPane.showInputDialog(null, "Ingrese el nombre del Usuario:", "Usuario", JOptionPane.INFORMATION_MESSAGE));
+        vnombre = JOptionPane.showInputDialog(null, "Ingrese el nombre del Usuario:");
     }
 
     public void capturaCorreo() {
-        setVcorreo(JOptionPane.showInputDialog(null, "Ingrese el correo del Usuario:", "Usuario", JOptionPane.INFORMATION_MESSAGE));
+        vcorreo = JOptionPane.showInputDialog(null, "Ingrese el correo del Usuario:");
     }
 
     public void capturaContrasena() {
-        setVcontrasena(JOptionPane.showInputDialog(null, "Ingrese la contraseña del Usuario:", "Usuario", JOptionPane.INFORMATION_MESSAGE));
+        vcontrasena = JOptionPane.showInputDialog(null, "Ingrese la contraseña del Usuario:");
     }
 
-    public void mostrarInformacionUsuario() {
-        String informacion = """
-                             --------USUARIO------
-                             Nombre de Usuario: """ + vnombre +
-                             "\nCorreo de Usuario: " + vcorreo +
-                             "\n----------------------------";
+    public void capturaPais() {
+        vpais = JOptionPane.showInputDialog(null, "Ingrese el país del Usuario:");
+    }
 
-        JOptionPane.showMessageDialog(null, informacion, "Datos de Usuario", JOptionPane.INFORMATION_MESSAGE);
+    public void mostrarDatos(Usuario u) {
+        String datos = "----- USUARIO -----\n"
+                + "Nombre: " + u.getNombre() + "\n"
+                + "Correo: " + u.getCorreo() + "\n"
+                + "Contraseña: " + u.getContrasena() + "\n"
+                + "País: " + u.getPais();
+        JOptionPane.showMessageDialog(null, datos, "Datos encontrados", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public void mostrarMensajeExito(String mensaje) {
+        JOptionPane.showMessageDialog(null, mensaje, "Éxito", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public void mostrarMensajeError(String mensaje) {
+        JOptionPane.showMessageDialog(null, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    public void mostrarError(String mensaje) {
+        JOptionPane.showMessageDialog(null, mensaje, "Error técnico", JOptionPane.ERROR_MESSAGE);
     }
 
     public String getVnombre() {
         return vnombre;
     }
 
-    public void setVnombre(String vnombre) {
-        this.vnombre = vnombre;
-    }
-
     public String getVcorreo() {
         return vcorreo;
-    }
-
-    public void setVcorreo(String vcorreo) {
-        this.vcorreo = vcorreo;
     }
 
     public String getVcontrasena() {
         return vcontrasena;
     }
 
-    public void setVcontrasena(String vcontrasena) {
-        this.vcontrasena = vcontrasena;
+    public String getVpais() {
+        return vpais;
     }
 }

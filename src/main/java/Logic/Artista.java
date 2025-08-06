@@ -1,6 +1,8 @@
 package Logic;
 
 public class Artista {
+
+    private int idArtista;
     private String nombre;
     private String genero;
     private String pais;
@@ -12,13 +14,20 @@ public class Artista {
         this.genero = genero;
         this.pais = pais;
     }
-    
-public Artista(String nombre) {
-    this.nombre = nombre;
-    this.pais = "";
-    this.genero = "";
-}
 
+    public Artista(String nombre) {
+        this.nombre = nombre;
+        this.genero = "";
+        this.pais = "";
+    }
+
+    public int getIdArtista() {
+        return idArtista;
+    }
+
+    public void setIdArtista(int idArtista) {
+        this.idArtista = idArtista;
+    }
 
     public String getNombre() {
         return nombre;

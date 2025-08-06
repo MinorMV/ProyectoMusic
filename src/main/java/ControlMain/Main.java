@@ -71,260 +71,127 @@ public class Main {
                 continue;
             }
 
-            switch (seleccion) {
-                case "Agregar usuario" -> {
-                    ViewUsuario vu = new ViewUsuario();
-                    Usuario mu = new Usuario();
-                    try {
-                        Connection con = Conexion.getConexion();
-                        ControlUsuario cu = new ControlUsuario(con);
-                        cu.capturarDatosUsuario(vu, mu);
-                        Conexion.cerrarConexion();
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, "Error al guardar el usuario: " + e.getMessage());
-                    }
-                }
-                case "Buscar usuario por correo" -> {
-                    ViewUsuario vuBuscar = new ViewUsuario();
-                    try {
-                        Connection con = Conexion.getConexion();
-                        ControlUsuario cuBuscar = new ControlUsuario(con);
-                        cuBuscar.buscarYMostrarUsuarioPorCorreo(vuBuscar);
-                        Conexion.cerrarConexion();
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, "Error al buscar usuario: " + e.getMessage());
-                    }
-                }
-                case "Modificar usuario por correo" -> {
-                    ViewUsuario vuModificar = new ViewUsuario();
-                    try {
-                        Connection con = Conexion.getConexion();
-                        ControlUsuario cuModificar = new ControlUsuario(con);
-                        cuModificar.modificarUsuarioPorCorreo(vuModificar);
-                        Conexion.cerrarConexion();
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, "Error al modificar usuario: " + e.getMessage());
-                    }
-                }
-                case "Eliminar usuario por correo" -> {
-                    ViewUsuario vuEliminar = new ViewUsuario();
-                    try {
-                        Connection con = Conexion.getConexion();
-                        ControlUsuario cuEliminar = new ControlUsuario(con);
-                        cuEliminar.eliminarUsuarioPorCorreo(vuEliminar);
-                        Conexion.cerrarConexion();
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, "Error al eliminar usuario: " + e.getMessage());
-                    }
-                }
-                case "Agregar artista" -> {
-                    ViewArtista va = new ViewArtista();
-                    Artista ma = new Artista();
-                    try {
-                        Connection con = Conexion.getConexion();
-                        ControlArtista ca = new ControlArtista(con);
-                        ca.capturarDatosArtista(va, ma);
-                        Conexion.cerrarConexion();
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, "Error al guardar el artista: " + e.getMessage());
-                    }
-                }
-                case "Buscar artista por nombre" -> {
-                    ViewArtista vaBuscar = new ViewArtista();
-                    try {
-                        Connection con = Conexion.getConexion();
-                        ControlArtista caBuscar = new ControlArtista(con);
-                        caBuscar.buscarYMostrarArtistaPorNombre(vaBuscar);
-                        Conexion.cerrarConexion();
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, "Error al buscar artista: " + e.getMessage());
-                    }
-                }
-                case "Modificar artista por nombre" -> {
-                    ViewArtista vaModificar = new ViewArtista();
-                    try {
-                        Connection con = Conexion.getConexion();
-                        ControlArtista caModificar = new ControlArtista(con);
-                        caModificar.modificarArtistaPorNombre(vaModificar);
-                        Conexion.cerrarConexion();
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, "Error al modificar artista: " + e.getMessage());
-                    }
-                }
-                case "Eliminar artista por nombre" -> {
-                    ViewArtista vaEliminar = new ViewArtista();
-                    try {
-                        Connection con = Conexion.getConexion();
-                        ControlArtista caEliminar = new ControlArtista(con);
-                        caEliminar.eliminarArtistaPorNombre(vaEliminar);
-                        Conexion.cerrarConexion();
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, "Error al eliminar artista: " + e.getMessage());
-                    }
-                }
-                case "Agregar canción" -> {
-                    ViewCancion vc = new ViewCancion();
-                    try {
-                        Connection con = Conexion.getConexion();
-                        ControlCancion cc = new ControlCancion(con);
-                        cc.insertarCancion(vc);
-                        Conexion.cerrarConexion();
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
-                    }
-                }
-                case "Buscar canción por título" -> {
-                    ViewCancion vc = new ViewCancion();
-                    try {
-                        Connection con = Conexion.getConexion();
-                        ControlCancion cc = new ControlCancion(con);
-                        cc.buscarCancion(vc);
-                        Conexion.cerrarConexion();
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
-                    }
-                }
-                case "Modificar canción por título" -> {
-                    ViewCancion vc = new ViewCancion();
-                    try {
-                        Connection con = Conexion.getConexion();
-                        ControlCancion cc = new ControlCancion(con);
-                        cc.modificarCancion(vc);
-                        Conexion.cerrarConexion();
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
-                    }
-                }
-                case "Eliminar canción por título" -> {
-                    ViewCancion vc = new ViewCancion();
-                    try {
-                        Connection con = Conexion.getConexion();
-                        ControlCancion cc = new ControlCancion(con);
-                        cc.eliminarCancion(vc);
-                        Conexion.cerrarConexion();
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
-                    }
-                }
-                case "Agregar álbum" -> {
-                    ViewAlbum va = new ViewAlbum();
-                    Album ma = new Album();
-                    try {
-                        Connection con = Conexion.getConexion();
-                        ControlAlbum ca = new ControlAlbum();
-                        ca.capturardatosAlbum(ma, va);
+            try (Connection con = Conexion.getConexion()) {
+                switch (seleccion) {
 
-                        DAO.AlbumDAO dao = new DAO.AlbumDAO(con);
-                        for (var c : ma.getCanciones()) {
-                            dao.obtenerIdCancionPorTitulo(c.getTitulo());
-                        }
-
-                        dao.insertarAlbum(ma);
-                        Conexion.cerrarConexion();
-                        JOptionPane.showMessageDialog(null, "¡Álbum guardado correctamente!");
-
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, "Error al guardar el álbum: " + e.getMessage());
+                    case "Agregar usuario" -> {
+                        ViewUsuario view = new ViewUsuario();
+                        ControlUsuario control = new ControlUsuario(con);
+                        control.insertarUsuario(view);
                     }
-                }
-                case "Buscar álbum por nombre" -> {
-                    ViewAlbum vaBuscar = new ViewAlbum();
-                    try {
-                        Connection con = Conexion.getConexion();
-                        String nombre = JOptionPane.showInputDialog("Digite el nombre del álbum:");
-                        DAO.AlbumDAO dao = new DAO.AlbumDAO(con);
-                        Album album = dao.buscarAlbumPorNombre(nombre);
+                    case "Buscar usuario por correo" -> {
+                        ViewUsuario view = new ViewUsuario();
+                        ControlUsuario control = new ControlUsuario(con);
+                        control.buscarUsuario(view);
+                    }
+                    case "Modificar usuario por correo" -> {
+                        ViewUsuario view = new ViewUsuario();
+                        ControlUsuario control = new ControlUsuario(con);
+                        control.modificarUsuario(view);
+                    }
+                    case "Eliminar usuario por correo" -> {
+                        ViewUsuario view = new ViewUsuario();
+                        ControlUsuario control = new ControlUsuario(con);
+                        control.eliminarUsuario(view);
+                    }
+
+                    case "Agregar artista" -> {
+                        ViewArtista view = new ViewArtista();
+                        ControlArtista control = new ControlArtista(con);
+                        control.insertarArtista(view);
+                    }
+                    case "Buscar artista por nombre" -> {
+                        ViewArtista view = new ViewArtista();
+                        ControlArtista control = new ControlArtista(con);
+                        control.buscarArtista(view);
+                    }
+                    case "Modificar artista por nombre" -> {
+                        ViewArtista view = new ViewArtista();
+                        ControlArtista control = new ControlArtista(con);
+                        control.modificarArtista(view);
+                    }
+                    case "Eliminar artista por nombre" -> {
+                        ViewArtista view = new ViewArtista();
+                        ControlArtista control = new ControlArtista(con);
+                        control.eliminarArtista(view);
+                    }
+
+                    case "Agregar canción" -> {
+                        ViewCancion view = new ViewCancion();
+                        ControlCancion control = new ControlCancion(con);
+                        control.insertarCancion(view);
+                    }
+                    case "Buscar canción por título" -> {
+                        ViewCancion view = new ViewCancion();
+                        ControlCancion control = new ControlCancion(con);
+                        control.buscarCancion(view);
+                    }
+                    case "Modificar canción por título" -> {
+                        ViewCancion view = new ViewCancion();
+                        ControlCancion control = new ControlCancion(con);
+                        control.modificarCancion(view);
+                    }
+                    case "Eliminar canción por título" -> {
+                        ViewCancion view = new ViewCancion();
+                        ControlCancion control = new ControlCancion(con);
+                        control.eliminarCancion(view);
+                    }
+
+                    case "Agregar álbum" -> {
+                        ViewAlbum view = new ViewAlbum();
+                        ControlAlbum control = new ControlAlbum(con);
+                        control.insertarAlbum(view);
+                    }
+                    case "Buscar álbum por nombre" -> {
+                        ViewAlbum view = new ViewAlbum();
+                        ControlAlbum control = new ControlAlbum(con);
+                        Album album = control.buscarAlbum(view); 
                         if (album != null) {
-                            vaBuscar.setValbumNombre(album.getAlbumNombre());
-                            vaBuscar.setVfechaCreacion(album.getFechaCreacion());
-                            vaBuscar.setVgenero(album.getGenero());
-                            vaBuscar.setVdescargas(album.getDescargas());
-                            vaBuscar.setVartista(album.getArtista());
-                            vaBuscar.mostrarinformacionAlbum();
+                            view.setValbumNombre(album.getAlbumNombre());
+                            view.setVfechaCreacion(album.getFechaCreacion());
+                            view.setVgenero(album.getGenero());
+                            view.setVdescargas(album.getDescargas());
+                            view.setVartista(album.getArtista());
+                            view.mostrarinformacionAlbum();
                         } else {
-                            JOptionPane.showMessageDialog(null, "Álbum no encontrado");
+                            view.mostrarMensajeError("Álbum no encontrado.");
                         }
-                        Conexion.cerrarConexion();
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, "Error al buscar álbum: " + e.getMessage());
+                    }
+
+                    case "Modificar álbum por nombre" -> {
+                        ViewAlbum view = new ViewAlbum();
+                        ControlAlbum control = new ControlAlbum(con);
+                        control.modificarAlbum(view);
+                    }
+                    case "Eliminar álbum por nombre" -> {
+                        ViewAlbum view = new ViewAlbum();
+                        ControlAlbum control = new ControlAlbum(con);
+                        control.eliminarAlbum(view);
+                    }
+
+                    case "Agregar playlist" -> {
+                        ViewPlaylist view = new ViewPlaylist();
+                        ControlPlaylist control = new ControlPlaylist(con);
+                        control.insertarPlaylist(view);
+                    }
+                    case "Buscar playlist por nombre" -> {
+                        ViewPlaylist view = new ViewPlaylist();
+                        ControlPlaylist control = new ControlPlaylist(con);
+                        control.buscarPlaylist(view);
+                    }
+                    case "Modificar playlist por nombre" -> {
+                        ViewPlaylist view = new ViewPlaylist();
+                        ControlPlaylist control = new ControlPlaylist(con);
+                        control.modificarPlaylist(con, view);
+                    }
+                    case "Eliminar playlist por nombre" -> {
+                        ViewPlaylist view = new ViewPlaylist();
+                        ControlPlaylist control = new ControlPlaylist(con);
+                        control.eliminarPlaylist(view);
                     }
                 }
-                case "Modificar álbum por nombre" -> {
-                    try {
-                        Connection con = Conexion.getConexion();
-                        String nombre = JOptionPane.showInputDialog("Digite el nombre del álbum a modificar:");
-                        DAO.AlbumDAO dao = new DAO.AlbumDAO(con);
-                        Album album = dao.buscarAlbumPorNombre(nombre);
-                        if (album != null) {
-                            ViewAlbum vaModificar = new ViewAlbum();
-                            ControlAlbum caModificar = new ControlAlbum();
-                            caModificar.capturardatosAlbum(album, vaModificar);
-                            dao.modificarAlbum(album);
-                            JOptionPane.showMessageDialog(null, "Álbum modificado correctamente.");
-                        } else {
-                            JOptionPane.showMessageDialog(null, "Álbum no encontrado");
-                        }
-                        Conexion.cerrarConexion();
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, "Error al modificar álbum: " + e.getMessage());
-                    }
-                }
-                case "Eliminar álbum por nombre" -> {
-                    try {
-                        Connection con = Conexion.getConexion();
-                        String nombre = JOptionPane.showInputDialog("Digite el nombre del álbum a eliminar:");
-                        DAO.AlbumDAO dao = new DAO.AlbumDAO(con);
-                        dao.eliminarAlbumPorNombre(nombre);
-                        Conexion.cerrarConexion();
-                        JOptionPane.showMessageDialog(null, "Álbum eliminado correctamente.");
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, "Error al eliminar álbum: " + e.getMessage());
-                    }
-                }
-                case "Agregar playlist" -> {
-                    ViewPlaylist vp = new ViewPlaylist();
-                    try {
-                        Connection con = Conexion.getConexion();
-                        ControlPlaylist cp = new ControlPlaylist(con);
-                        cp.insertarPlaylist(vp);
-                        Conexion.cerrarConexion();
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, "Error al agregar playlist: " + e.getMessage());
-                    }
-                }
-                case "Buscar playlist por nombre" -> {
-                    ViewPlaylist vp = new ViewPlaylist();
-                    try {
-                        Connection con = Conexion.getConexion();
-                        ControlPlaylist cp = new ControlPlaylist(con);
-                        cp.buscarPlaylist(vp);
-                        Conexion.cerrarConexion();
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, "Error al buscar playlist: " + e.getMessage());
-                    }
-                }
-                case "Modificar playlist por nombre" -> {
-                    ViewPlaylist vp = new ViewPlaylist();
-                    try {
-                        Connection con = Conexion.getConexion();
-                        ControlPlaylist cp = new ControlPlaylist(con);
-                        cp.modificarPlaylist(con, vp);
-                        Conexion.cerrarConexion();
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, "Error al modificar playlist: " + e.getMessage());
-                    }
-                }
-                case "Eliminar playlist por nombre" -> {
-                    ViewPlaylist vp = new ViewPlaylist();
-                    try {
-                        Connection con = Conexion.getConexion();
-                        ControlPlaylist cp = new ControlPlaylist(con);
-                        cp.eliminarPlaylist(vp);
-                        Conexion.cerrarConexion();
-                    } catch (Exception e) {
-                        JOptionPane.showMessageDialog(null, "Error al eliminar playlist: " + e.getMessage());
-                    }
-                }
+            } catch (Exception e) {
+                JOptionPane.showMessageDialog(null, "Error: " + e.getMessage());
             }
         }
     }

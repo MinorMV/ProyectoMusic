@@ -47,9 +47,10 @@ public class PlaylistDAO {
             try (ResultSet rs = ps.executeQuery()) {
                 if (rs.next()) {
                     Usuario usuario = new Usuario(
-                        rs.getString("NOMBRE_USUARIO"),
-                        rs.getString("CORREO"),
-                        rs.getString("CONTRASENA")
+                            rs.getString("NOMBRE_USUARIO"),
+                            rs.getString("CORREO"),
+                            rs.getString("CONTRASENA"),
+                            rs.getString("PAIS")
                     );
                     Playlist p = new Playlist(nombrePlaylist, usuario);
                     p.getCanciones().addAll(obtenerCancionesDePlaylist(nombrePlaylist));
@@ -81,14 +82,16 @@ public class PlaylistDAO {
     // ========================================
     // MÉTODOS AUXILIARES
     // ========================================
-
     private int obtenerIdUsuarioPorNombre(String nombreUsuario) throws SQLException {
         String sql = "SELECT ID_USUARIO FROM USUARIOS WHERE NOMBRE = ?";
         try (PreparedStatement ps = conexion.prepareStatement(sql)) {
             ps.setString(1, nombreUsuario);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getInt("ID_USUARIO");
-                else throw new SQLException("Usuario no encontrado: " + nombreUsuario);
+                if (rs.next()) {
+                    return rs.getInt("ID_USUARIO");
+                } else {
+                    throw new SQLException("Usuario no encontrado: " + nombreUsuario);
+                }
             }
         }
     }
@@ -98,8 +101,11 @@ public class PlaylistDAO {
         try (PreparedStatement ps = conexion.prepareStatement(sql)) {
             ps.setString(1, nombre);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getInt("ID_PLAYLIST");
-                else throw new SQLException("Playlist no encontrada: " + nombre);
+                if (rs.next()) {
+                    return rs.getInt("ID_PLAYLIST");
+                } else {
+                    throw new SQLException("Playlist no encontrada: " + nombre);
+                }
             }
         }
     }
@@ -109,8 +115,11 @@ public class PlaylistDAO {
         try (PreparedStatement ps = conexion.prepareStatement(sql)) {
             ps.setString(1, titulo);
             try (ResultSet rs = ps.executeQuery()) {
-                if (rs.next()) return rs.getInt("ID_CANCION");
-                else throw new SQLException("Canción no encontrada: " + titulo);
+                if (rs.next()) {
+                    return rs.getInt("ID_CANCION");
+                } else {
+                    throw new SQLException("Canción no encontrada: " + titulo);
+                }
             }
         }
     }

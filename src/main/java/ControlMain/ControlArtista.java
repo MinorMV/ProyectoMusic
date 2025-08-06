@@ -4,62 +4,76 @@ import DAO.ArtistaDAO;
 import Logic.Artista;
 import View.ViewArtista;
 import java.sql.Connection;
-import javax.swing.JOptionPane;
 
 public class ControlArtista {
 
-    private ArtistaDAO dao;
+    private final ArtistaDAO dao;
 
     public ControlArtista(Connection conexion) {
         dao = new ArtistaDAO(conexion);
     }
 
-    public void capturarDatosArtista(ViewArtista vista, Artista artista) {
-        artista.setNombre(vista.pedirNombre());
-        artista.setGenero(vista.pedirGenero());
-        artista.setPais(vista.pedirPais());
+    public void insertarArtista(ViewArtista vista) {
         try {
-            dao.insertarArtista(artista);
-            JOptionPane.showMessageDialog(null, "Artista insertado correctamente.");
+            Artista artista = new Artista(
+                vista.pedirNombre(),
+                vista.pedirGenero(),
+                vista.pedirPais()
+            );
+            boolean exito = dao.insertarArtista(artista);
+            if (exito) {
+                vista.mostrarMensajeExito("Artista insertado correctamente.");
+            } else {
+                vista.mostrarMensajeError("No se pudo insertar el artista.");
+            }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error al insertar artista: " + e.getMessage());
+            vista.mostrarError(e);
         }
     }
 
-    public void buscarYMostrarArtistaPorNombre(ViewArtista vista) {
-        String nombre = vista.pedirNombre();
+    public void buscarArtista(ViewArtista vista) {
         try {
+            String nombre = vista.pedirNombre();
             Artista artista = dao.buscarArtistaPorNombre(nombre);
             if (artista != null) {
                 vista.mostrarDatos(artista);
             } else {
-                JOptionPane.showMessageDialog(null, "No se encontró un artista con ese nombre.");
+                vista.mostrarMensajeError("No se encontró el artista.");
             }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error al buscar artista: " + e.getMessage());
+            vista.mostrarError(e);
         }
     }
 
-    public void modificarArtistaPorNombre(ViewArtista vista) {
-        Artista artista = new Artista();
-        artista.setNombre(vista.pedirNombre());
-        artista.setGenero(vista.pedirGenero());
-        artista.setPais(vista.pedirPais());
+    public void modificarArtista(ViewArtista vista) {
         try {
-            dao.modificarArtista(artista);
-            JOptionPane.showMessageDialog(null, "Artista modificado correctamente.");
+            Artista artista = new Artista(
+                vista.pedirNombre(),
+                vista.pedirGenero(),
+                vista.pedirPais()
+            );
+            boolean exito = dao.modificarArtista(artista);
+            if (exito) {
+                vista.mostrarMensajeExito("Artista modificado correctamente.");
+            } else {
+                vista.mostrarMensajeError("No se pudo modificar el artista.");
+            }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error al modificar artista: " + e.getMessage());
+            vista.mostrarError(e);
         }
     }
 
-    public void eliminarArtistaPorNombre(ViewArtista vista) {
-        String nombre = vista.pedirNombre();
+    public void eliminarArtista(ViewArtista vista) {
         try {
-            dao.eliminarArtistaPorNombre(nombre);
-            JOptionPane.showMessageDialog(null, "Artista eliminado correctamente.");
+            String nombre = vista.pedirNombre();
+            boolean exito = dao.eliminarArtistaPorNombre(nombre);
+            if (exito) {
+                vista.mostrarMensajeExito("Artista eliminado correctamente.");
+            } else {
+                vista.mostrarMensajeError("No se pudo eliminar el artista.");
+            }
         } catch (Exception e) {
-            JOptionPane.showMessageDialog(null, "Error al eliminar artista: " + e.getMessage());
+            vista.mostrarError(e);
         }
     }
 }

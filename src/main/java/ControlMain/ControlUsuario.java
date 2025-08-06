@@ -1,96 +1,89 @@
+// ===== ControlMain/ControlUsuario.java =====
 package ControlMain;
 
 import Logic.Usuario;
 import View.ViewUsuario;
 import DAO.UsuarioDAO;
 import java.sql.Connection;
-import javax.swing.JOptionPane;
+import java.sql.SQLException;
 
 public class ControlUsuario {
-
-    private final UsuarioDAO usuarioDAO;
+    private final Connection con;
 
     public ControlUsuario(Connection con) {
-        this.usuarioDAO = new UsuarioDAO(con);
+        this.con = con;
     }
 
-    public void capturarDatosUsuario(ViewUsuario vu, Usuario mu) {
-        vu.capturaNombre();
-        mu.setNombre(vu.getVnombre());
+    public void insertarUsuario(ViewUsuario view) {
+        try {
+            view.capturaNombre();
+            view.capturaCorreo();
+            view.capturaContrasena();
+            view.capturaPais();
 
-        vu.capturaCorreo();
-        mu.setCorreo(vu.getVcorreo());
-
-        vu.capturaContrasena();
-        mu.setContrasena(vu.getVcontrasena());
-
-        vu.mostrarInformacionUsuario();
-
-        boolean exito = usuarioDAO.insertarUsuario(mu);
-        if (exito) {
-            System.out.println("Usuario guardado exitosamente en la base de datos.");
-        } else {
-            System.out.println("Hubo un error al guardar el usuario.");
+            Usuario u = new Usuario(view.getVnombre(), view.getVcorreo(), view.getVcontrasena(), view.getVpais());
+            UsuarioDAO dao = new UsuarioDAO(con);
+            dao.insertar(u);
+            view.mostrarMensajeExito("Usuario insertado correctamente.");
+        } catch (SQLException e) {
+            view.mostrarError("Error al insertar usuario: " + e.getMessage());
         }
     }
 
-    public void buscarYMostrarUsuarioPorCorreo(ViewUsuario vu) {
-        vu.capturaCorreo();
-        Usuario encontrado = usuarioDAO.buscarUsuarioPorCorreo(vu.getVcorreo());
-
-        if (encontrado != null) {
-            JOptionPane.showMessageDialog(null,
-                "Usuario encontrado:\n" +
-                "Nombre: " + encontrado.getNombre() + "\n" +
-                "Correo: " + encontrado.getCorreo() + "\n" +
-                "Contraseña: " + encontrado.getContrasena());
-        } else {
-            JOptionPane.showMessageDialog(null, "Usuario no encontrado.");
-        }
-    }
-
-    public void modificarUsuarioPorCorreo(ViewUsuario vu) {
-        vu.capturaCorreo();
-        String correoBuscar = vu.getVcorreo();
-
-        Usuario usuarioExistente = usuarioDAO.buscarUsuarioPorCorreo(correoBuscar);
-
-        if (usuarioExistente != null) {
-            JOptionPane.showMessageDialog(null, "Usuario encontrado. Ingresa los nuevos datos:");
-
-            vu.capturaNombre();
-            vu.capturaContrasena();
-
-            usuarioExistente.setNombre(vu.getVnombre());
-            usuarioExistente.setContrasena(vu.getVcontrasena());
-
-            boolean actualizado = usuarioDAO.modificarUsuario(usuarioExistente);
-            if (actualizado) {
-                JOptionPane.showMessageDialog(null, "Usuario modificado correctamente.");
+    public void buscarUsuario(ViewUsuario view) {
+        try {
+            view.capturaCorreo();
+            UsuarioDAO dao = new UsuarioDAO(con);
+            Usuario u = dao.buscar(view.getVcorreo());
+            if (u != null) {
+                view.mostrarDatos(u);
             } else {
-                JOptionPane.showMessageDialog(null, "Error al modificar el usuario.");
+                view.mostrarMensajeError("Usuario no encontrado.");
             }
-        } else {
-            JOptionPane.showMessageDialog(null, "Usuario no encontrado.");
+        } catch (SQLException e) {
+            view.mostrarError("Error al buscar usuario: " + e.getMessage());
         }
     }
 
-    public void eliminarUsuarioPorCorreo(ViewUsuario vu) {
-        vu.capturaCorreo();
-        String correoEliminar = vu.getVcorreo();
+    public void modificarUsuario(ViewUsuario view) {
+        try {
+            view.capturaCorreo();
+            UsuarioDAO dao = new UsuarioDAO(con);
+            Usuario u = dao.buscar(view.getVcorreo());
 
-        int confirmacion = JOptionPane.showConfirmDialog(null,
-                "¿Estás seguro que deseas eliminar el usuario con correo " + correoEliminar + "?",
-                "Confirmar eliminación",
-                JOptionPane.YES_NO_OPTION);
+            if (u != null) {
+                view.capturaNombre();
+                view.capturaContrasena();
+                view.capturaPais();
 
-        if (confirmacion == JOptionPane.YES_OPTION) {
-            boolean eliminado = usuarioDAO.eliminarUsuarioPorCorreo(correoEliminar);
-            if (eliminado) {
-                JOptionPane.showMessageDialog(null, " Usuario eliminado correctamente.");
+                u.setNombre(view.getVnombre());
+                u.setContrasena(view.getVcontrasena());
+                u.setPais(view.getVpais());
+
+                dao.modificar(u);
+                view.mostrarMensajeExito("Usuario modificado correctamente.");
             } else {
-                JOptionPane.showMessageDialog(null, " No se pudo eliminar el usuario.");
+                view.mostrarMensajeError("No se encontró un usuario con ese correo.");
             }
+        } catch (SQLException e) {
+            view.mostrarError("Error al modificar usuario: " + e.getMessage());
+        }
+    }
+
+    public void eliminarUsuario(ViewUsuario view) {
+        try {
+            view.capturaCorreo();
+            UsuarioDAO dao = new UsuarioDAO(con);
+            Usuario u = dao.buscar(view.getVcorreo());
+
+            if (u != null) {
+                dao.eliminar(view.getVcorreo());
+                view.mostrarMensajeExito("Usuario eliminado correctamente.");
+            } else {
+                view.mostrarMensajeError("No se encontró un usuario con ese correo.");
+            }
+        } catch (SQLException e) {
+            view.mostrarError("Error al eliminar usuario: " + e.getMessage());
         }
     }
 }
