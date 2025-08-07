@@ -22,7 +22,7 @@ public class ViewCancion {
     }
 
     public void capturaGenero() {
-        vgenero = JOptionPane.showInputDialog("Ingrese el género de la canción:");
+        vgenero = JOptionPane.showInputDialog("Ingrese el género:");
     }
 
     public void capturaArtista() {
@@ -49,7 +49,15 @@ public class ViewCancion {
         return vartista;
     }
 
-    public void mostrarMensaje(String mensaje) {
-        JOptionPane.showMessageDialog(null, mensaje);
+    public void mostrarMensajeExito(String msg) {
+        JOptionPane.showMessageDialog(null, msg, "Éxito", JOptionPane.INFORMATION_MESSAGE);
+    }
+
+    public void mostrarMensajeError(String msg) {
+        JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
+    }
+
+    public boolean confirmarAccion(String mensaje) {
+        return JOptionPane.showConfirmDialog(null, mensaje, "Confirmar", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
     }
 }

@@ -5,11 +5,13 @@ import java.util.ArrayList;
 public class Playlist {
 
     private String nombre;
+    private String descripcion;
     private Usuario usuario;
     private final ArrayList<Cancion> canciones;
 
     public Playlist() {
         this.nombre = "";
+        this.descripcion = "";
         this.usuario = new Usuario();
         this.canciones = new ArrayList<>();
     }
@@ -17,6 +19,7 @@ public class Playlist {
     public Playlist(String nombre, Usuario usuario) {
         this.nombre = nombre;
         this.usuario = usuario;
+        this.descripcion = "";
         this.canciones = new ArrayList<>();
     }
 
@@ -26,6 +29,14 @@ public class Playlist {
 
     public void setNombre(String nombre) {
         this.nombre = nombre;
+    }
+
+    public String getDescripcion() {
+        return descripcion;
+    }
+
+    public void setDescripcion(String descripcion) {
+        this.descripcion = descripcion;
     }
 
     public Usuario getUsuario() {
@@ -40,7 +51,6 @@ public class Playlist {
         return canciones;
     }
 
-    // ✅ Método agregado para corregir el error
     public void setCanciones(ArrayList<Cancion> canciones) {
         this.canciones.clear();
         if (canciones != null) {
@@ -60,6 +70,7 @@ public class Playlist {
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("Playlist: ").append(nombre).append("\n");
+        sb.append("Descripción: ").append(descripcion).append("\n");
         sb.append("Usuario: ").append(usuario.getNombre()).append("\n");
         sb.append("Canciones:\n");
 

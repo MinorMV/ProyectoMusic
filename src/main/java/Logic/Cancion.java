@@ -15,6 +15,7 @@ public class Cancion {
         artista = null;
     }
 
+    
     public Cancion(String titulo, String album, String duracion, String genero) {
         this.titulo = titulo;
         this.album = album;
@@ -23,12 +24,13 @@ public class Cancion {
         this.artista = null;
     }
 
-    public Cancion(String titulo, String album, String duracion, String genero, Artista artista) {
+    
+    public Cancion(String titulo, String duracion, Artista artista, String genero, String album) {
         this.titulo = titulo;
-        this.album = album;
         this.duracion = duracion;
-        this.genero = genero;
         this.artista = artista;
+        this.genero = genero;
+        this.album = album;
     }
 
     public String getTitulo() {

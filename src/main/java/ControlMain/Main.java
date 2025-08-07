@@ -1,10 +1,6 @@
 package ControlMain;
 
 import Logic.Album;
-import Logic.Artista;
-import Logic.Cancion;
-import Logic.Playlist;
-import Logic.Usuario;
 import View.ViewAlbum;
 import View.ViewArtista;
 import View.ViewCancion;
@@ -74,6 +70,7 @@ public class Main {
             try (Connection con = Conexion.getConexion()) {
                 switch (seleccion) {
 
+                    // USUARIO
                     case "Agregar usuario" -> {
                         ViewUsuario view = new ViewUsuario();
                         ControlUsuario control = new ControlUsuario(con);
@@ -95,6 +92,7 @@ public class Main {
                         control.eliminarUsuario(view);
                     }
 
+                    // ARTISTA
                     case "Agregar artista" -> {
                         ViewArtista view = new ViewArtista();
                         ControlArtista control = new ControlArtista(con);
@@ -116,27 +114,25 @@ public class Main {
                         control.eliminarArtista(view);
                     }
 
+                    // CANCIÓN
                     case "Agregar canción" -> {
-                        ViewCancion view = new ViewCancion();
                         ControlCancion control = new ControlCancion(con);
-                        control.insertarCancion(view);
+                        control.insertarCancion();
                     }
                     case "Buscar canción por título" -> {
-                        ViewCancion view = new ViewCancion();
                         ControlCancion control = new ControlCancion(con);
-                        control.buscarCancion(view);
+                        control.buscarCancion();
                     }
                     case "Modificar canción por título" -> {
-                        ViewCancion view = new ViewCancion();
                         ControlCancion control = new ControlCancion(con);
-                        control.modificarCancion(view);
+                        control.modificarCancion();
                     }
                     case "Eliminar canción por título" -> {
-                        ViewCancion view = new ViewCancion();
                         ControlCancion control = new ControlCancion(con);
-                        control.eliminarCancion(view);
+                        control.eliminarCancion();
                     }
 
+                    // ÁLBUM
                     case "Agregar álbum" -> {
                         ViewAlbum view = new ViewAlbum();
                         ControlAlbum control = new ControlAlbum(con);
@@ -145,7 +141,7 @@ public class Main {
                     case "Buscar álbum por nombre" -> {
                         ViewAlbum view = new ViewAlbum();
                         ControlAlbum control = new ControlAlbum(con);
-                        Album album = control.buscarAlbum(view); 
+                        Album album = control.buscarAlbum(view);
                         if (album != null) {
                             view.setValbumNombre(album.getAlbumNombre());
                             view.setVfechaCreacion(album.getFechaCreacion());
@@ -157,7 +153,6 @@ public class Main {
                             view.mostrarMensajeError("Álbum no encontrado.");
                         }
                     }
-
                     case "Modificar álbum por nombre" -> {
                         ViewAlbum view = new ViewAlbum();
                         ControlAlbum control = new ControlAlbum(con);
@@ -169,6 +164,7 @@ public class Main {
                         control.eliminarAlbum(view);
                     }
 
+                    // PLAYLIST
                     case "Agregar playlist" -> {
                         ViewPlaylist view = new ViewPlaylist();
                         ControlPlaylist control = new ControlPlaylist(con);
@@ -182,7 +178,7 @@ public class Main {
                     case "Modificar playlist por nombre" -> {
                         ViewPlaylist view = new ViewPlaylist();
                         ControlPlaylist control = new ControlPlaylist(con);
-                        control.modificarPlaylist(con, view);
+                        control.modificarPlaylist(view);
                     }
                     case "Eliminar playlist por nombre" -> {
                         ViewPlaylist view = new ViewPlaylist();

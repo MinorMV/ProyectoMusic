@@ -5,73 +5,96 @@ import Logic.Artista;
 import Logic.Cancion;
 import View.ViewCancion;
 import java.sql.Connection;
+import java.sql.SQLException;
 
 public class ControlCancion {
-    private Connection conexion;
+    private final CancionDAO dao;
+    private final ViewCancion view;
 
     public ControlCancion(Connection conexion) {
-        this.conexion = conexion;
+        this.dao = new CancionDAO(conexion);
+        this.view = new ViewCancion();
     }
 
-    public void insertarCancion(ViewCancion vc) throws Exception {
-        vc.capturaTitulo();
-        vc.capturaAlbum();
-        vc.capturaDuracion();
-        vc.capturaGenero();
-        vc.capturaArtista();
+    public void insertarCancion() {
+        try {
+            view.capturaTitulo();
+            view.capturaDuracion();
+            view.capturaGenero();
+            view.capturaAlbum();
+            view.capturaArtista();
 
-        Cancion cancion = new Cancion();
-        cancion.setTitulo(vc.getTitulo());
-        cancion.setAlbum(vc.getAlbum());
-        cancion.setDuracion(vc.getDuracion());
-        cancion.setGenero(vc.getGenero());
-        cancion.setArtista(new Artista(vc.getArtista()));
+            Artista artista = new Artista();
+            artista.setNombre(view.getArtista());
 
-        CancionDAO dao = new CancionDAO(conexion);
-        dao.insertarCancion(cancion);
+            Cancion c = new Cancion(
+                view.getTitulo(),
+                view.getDuracion(),
+                artista,
+                view.getGenero(),
+                view.getAlbum()
+            );
 
-        vc.mostrarMensaje("Canción insertada correctamente.");
-    }
-
-    public void buscarCancion(ViewCancion vc) throws Exception {
-        vc.capturaTitulo();
-        CancionDAO dao = new CancionDAO(conexion);
-        Cancion cancion = dao.buscarPorTitulo(vc.getTitulo());
-
-        if (cancion != null) {
-            vc.mostrarMensaje(cancion.toString());
-        } else {
-            vc.mostrarMensaje("Canción no encontrada.");
+            dao.insertarCancion(c);
+            view.mostrarMensajeExito("Canción insertada correctamente.");
+        } catch (SQLException e) {
+            view.mostrarMensajeError("Error al insertar la canción: " + e.getMessage());
         }
     }
 
-    public void modificarCancion(ViewCancion vc) throws Exception {
-        vc.capturaTitulo();
-        CancionDAO dao = new CancionDAO(conexion);
-        Cancion cancion = dao.buscarPorTitulo(vc.getTitulo());
+    public void buscarCancion() {
+        try {
+            view.capturaTitulo();
+            Cancion c = dao.buscarCancionPorTitulo(view.getTitulo());
 
-        if (cancion != null) {
-            vc.capturaAlbum();
-            vc.capturaDuracion();
-            vc.capturaGenero();
-            vc.capturaArtista();
-
-            cancion.setAlbum(vc.getAlbum());
-            cancion.setDuracion(vc.getDuracion());
-            cancion.setGenero(vc.getGenero());
-            cancion.setArtista(new Artista(vc.getArtista()));
-
-            dao.modificarCancion(cancion);
-            vc.mostrarMensaje("Canción modificada correctamente.");
-        } else {
-            vc.mostrarMensaje("No se encontró la canción para modificar.");
+            if (c != null) {
+                view.mostrarMensajeExito("Canción encontrada:\n" + c.toString());
+            } else {
+                view.mostrarMensajeError("No se encontró ninguna canción con ese título.");
+            }
+        } catch (SQLException e) {
+            view.mostrarMensajeError("Error al buscar la canción: " + e.getMessage());
         }
     }
 
-    public void eliminarCancion(ViewCancion vc) throws Exception {
-        vc.capturaTitulo();
-        CancionDAO dao = new CancionDAO(conexion);
-        dao.eliminarCancion(vc.getTitulo());
-        vc.mostrarMensaje("Canción eliminada correctamente.");
+    public void modificarCancion() {
+        try {
+            view.capturaTitulo();
+            Cancion c = dao.buscarCancionPorTitulo(view.getTitulo());
+
+            if (c != null) {
+                view.capturaDuracion();
+                view.capturaGenero();
+                view.capturaAlbum();
+                view.capturaArtista();
+
+                Artista artista = new Artista();
+                artista.setNombre(view.getArtista());
+
+                c.setDuracion(view.getDuracion());
+                c.setGenero(view.getGenero());
+                c.setAlbum(view.getAlbum());
+                c.setArtista(artista);
+
+                dao.modificarCancion(c);
+                view.mostrarMensajeExito("Canción modificada correctamente.");
+            } else {
+                view.mostrarMensajeError("No se encontró la canción a modificar.");
+            }
+        } catch (SQLException e) {
+            view.mostrarMensajeError("Error al modificar la canción: " + e.getMessage());
+        }
+    }
+
+    public void eliminarCancion() {
+        try {
+            view.capturaTitulo();
+            if (view.confirmarAccion("¿Desea eliminar esta canción?")) {
+                dao.eliminarCancion(view.getTitulo());
+                view.mostrarMensajeExito("Canción eliminada correctamente.");
+            }
+        } catch (SQLException e) {
+            view.mostrarMensajeError("Error al eliminar la canción: " + e.getMessage());
+        }
     }
 }
