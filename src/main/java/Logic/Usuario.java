@@ -7,11 +7,16 @@ public class Usuario {
     private String contrasena;
     private String pais;
 
+    private String rol;
+
     public Usuario() {
         nombre = "";
         correo = "";
         contrasena = "";
         pais = "";
+
+        rol = "USER";
+
     }
 
     public Usuario(String nombre, String correo, String contrasena, String pais) {
@@ -19,6 +24,17 @@ public class Usuario {
         this.correo = correo;
         this.contrasena = contrasena;
         this.pais = pais;
+
+        this.rol = "USER";
+
+    }
+
+    public Usuario(String nombre, String correo, String contrasena, String pais, String rol) {
+        this.nombre = nombre;
+        this.correo = correo;
+        this.contrasena = contrasena;
+        this.pais = pais;
+        this.rol = rol;
     }
 
     public String getNombre() {
@@ -53,11 +69,21 @@ public class Usuario {
         this.pais = pais;
     }
 
+    public String getRol() {
+        return rol;
+    }
+
+    public void setRol(String rol) {
+        this.rol = rol;
+    }
+
     @Override
     public String toString() {
-        return "Nombre: " + nombre +
-               "\nCorreo: " + correo +
-               "\nContrasena: " + contrasena +
-               "\nPaís: " + pais + "\n";
+        return "Nombre: " + nombre
+                + "\nCorreo: " + correo
+                + "\nContrasena: " + contrasena
+                + "\nPaís: " + pais
+                + "\nRol: " + rol + "\n";
+
     }
 }

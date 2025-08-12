@@ -1,4 +1,3 @@
-// ===== View/ViewUsuario.java =====
 package View;
 
 import Logic.Usuario;
@@ -46,6 +45,10 @@ public class ViewUsuario {
 
     public void mostrarError(String mensaje) {
         JOptionPane.showMessageDialog(null, mensaje, "Error técnico", JOptionPane.ERROR_MESSAGE);
+    }
+
+    public void mostrarMensajeInfo(String msg) {
+        javax.swing.JOptionPane.showMessageDialog(null, msg, "Info", javax.swing.JOptionPane.INFORMATION_MESSAGE);
     }
 
     public String getVnombre() {

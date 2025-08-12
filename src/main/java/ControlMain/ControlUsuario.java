@@ -1,4 +1,4 @@
-// ===== ControlMain/ControlUsuario.java =====
+// src/main/java/ControlMain/ControlUsuario.java
 package ControlMain;
 
 import Logic.Usuario;
@@ -8,6 +8,7 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class ControlUsuario {
+
     private final Connection con;
 
     public ControlUsuario(Connection con) {
@@ -84,6 +85,75 @@ public class ControlUsuario {
             }
         } catch (SQLException e) {
             view.mostrarError("Error al eliminar usuario: " + e.getMessage());
+        }
+    }
+
+    public void asegurarAdmin(View.ViewUsuario view) {
+        try {
+            int created = new DAO.UsuarioDAO(con).asegurarAdmin();
+            if (created == 1) {
+                view.mostrarMensajeInfo("Admin por defecto creado/promovido.");
+            }
+
+        } catch (Exception e) {
+
+        }
+    }
+
+    public void registrarAdmin(ViewUsuario view) {
+        try {
+            view.capturaNombre();
+            view.capturaCorreo();
+            view.capturaContrasena();
+            view.capturaPais();
+
+            Usuario admin = new Usuario(view.getVnombre(), view.getVcorreo(), view.getVcontrasena(), view.getVpais(), "ADMIN");
+            new UsuarioDAO(con).registrarAdmin(admin);
+            view.mostrarMensajeExito("Administrador registrado correctamente.");
+        } catch (SQLException e) {
+            view.mostrarError("Error al registrar admin: " + e.getMessage());
+        }
+    }
+
+    public void promoverAAdmin(ViewUsuario view) {
+        try {
+            view.capturaCorreo();
+            new UsuarioDAO(con).promoverAAdmin(view.getVcorreo());
+            view.mostrarMensajeExito("Usuario promovido a ADMIN correctamente.");
+        } catch (SQLException e) {
+            view.mostrarError("Error al promover a ADMIN: " + e.getMessage());
+        }
+    }
+
+
+    public Usuario iniciarSesion(ViewUsuario view) {
+        try {
+            view.capturaCorreo();
+            view.capturaContrasena();
+
+            UsuarioDAO dao = new UsuarioDAO(con);
+
+            Usuario u = dao.buscar(view.getVcorreo());
+            if (u == null) {
+                view.mostrarMensajeError("Usuario no encontrado.");
+                return null;
+            }
+
+
+            if (!u.getContrasena().equals(view.getVcontrasena())) {
+                view.mostrarMensajeError("Contraseña incorrecta.");
+                return null;
+            }
+
+            String rol = dao.obtenerRol(u.getCorreo()); 
+            u.setRol(rol != null ? rol : "USER");
+
+            view.mostrarMensajeExito("Bienvenido, " + u.getNombre() + " (" + u.getRol() + ")");
+            return u;
+
+        } catch (Exception e) {
+            view.mostrarError("Error al iniciar sesión: " + e.getMessage());
+            return null;
         }
     }
 }
