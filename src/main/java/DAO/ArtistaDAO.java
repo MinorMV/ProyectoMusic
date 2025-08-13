@@ -1,69 +1,66 @@
 package DAO;
 
 import Logic.Artista;
-import java.sql.*;
-import oracle.jdbc.OracleTypes;
+import java.sql.Connection;
+import java.sql.CallableStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+// CAMBIO: excepciones
+import Excepciones.ValidacionException;           // CAMBIO
+import Excepciones.AccesoDatosException;          // CAMBIO
+import Excepciones.RecursoNoEncontradoException;  // CAMBIO
 
 public class ArtistaDAO {
 
-    private final Connection conexion;
+    private Connection conexion;
 
     public ArtistaDAO(Connection conexion) {
         this.conexion = conexion;
     }
 
-    public boolean insertarArtista(Artista artista) {
-        try (CallableStatement cs = conexion.prepareCall("{call insertar_artista(?, ?, ?)}")) {
+    public void insertarArtista(Artista artista) throws ValidacionException, AccesoDatosException { // CAMBIO
+        try {
+            CallableStatement cs = conexion.prepareCall("{ call INSERTAR_ARTISTA(?, ?, ?) }");
             cs.setString(1, artista.getNombre());
             cs.setString(2, artista.getGenero());
             cs.setString(3, artista.getPais());
-            cs.execute();
-            return true;
+            cs.executeUpdate();
         } catch (SQLException e) {
-            return false;
+            throw new AccesoDatosException("Error al insertar artista", e); // CAMBIO
         }
     }
 
-    public Artista buscarArtistaPorNombre(String nombre) {
-        try (CallableStatement cs = conexion.prepareCall("{ ? = call buscar_artista(?) }")) {
-            cs.registerOutParameter(1, OracleTypes.CURSOR);
-            cs.setString(2, nombre);
-            cs.execute();
-
-            ResultSet rs = (ResultSet) cs.getObject(1);
+    public Artista buscarArtistaPorNombre(String nombre)
+            throws AccesoDatosException, RecursoNoEncontradoException { // CAMBIO
+        try {
+            CallableStatement cs = conexion.prepareCall("{ call BUSCAR_ARTISTA_POR_NOMBRE(?) }");
+            cs.setString(1, nombre);
+            ResultSet rs = cs.executeQuery();
             if (rs.next()) {
-                Artista artista = new Artista();
-                artista.setIdArtista(rs.getInt("ID_ARTISTA"));
-                artista.setNombre(rs.getString("NOMBRE"));
-                artista.setGenero(rs.getString("GENERO"));
-                artista.setPais(rs.getString("PAIS"));
-                return artista;
+                Artista a = new Artista();
+                a.setNombre(rs.getString("NOMBRE"));
+                a.setGenero(rs.getString("GENERO"));
+                a.setPais(rs.getString("PAIS"));
+                return a;
+            } else {
+                throw new RecursoNoEncontradoException("Artista no encontrado"); // CAMBIO
             }
         } catch (SQLException e) {
-            return null;
+            throw new AccesoDatosException("Error al buscar artista", e); // CAMBIO
         }
-        return null;
     }
 
-    public boolean modificarArtista(Artista artista) {
-        try (CallableStatement cs = conexion.prepareCall("{call modificar_artista(?, ?, ?)}")) {
+    public int modificarArtistaPorNombre(Artista artista)
+            throws ValidacionException, AccesoDatosException { // CAMBIO
+        try {
+            CallableStatement cs = conexion.prepareCall("{ call MODIFICAR_ARTISTA_POR_NOMBRE(?, ?, ?) }");
             cs.setString(1, artista.getNombre());
             cs.setString(2, artista.getGenero());
             cs.setString(3, artista.getPais());
-            cs.execute();
-            return true;
+            return cs.executeUpdate();
         } catch (SQLException e) {
-            return false;
-        }
-    }
-
-    public boolean eliminarArtistaPorNombre(String nombre) {
-        try (CallableStatement cs = conexion.prepareCall("{call eliminar_artista(?)}")) {
-            cs.setString(1, nombre);
-            cs.execute();
-            return true;
-        } catch (SQLException e) {
-            return false;
+            throw new AccesoDatosException("Error al modificar artista", e); // CAMBIO
         }
     }
 }
