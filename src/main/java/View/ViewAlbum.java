@@ -1,206 +1,52 @@
 package View;
 
-import Logic.Artista;
-import Logic.Cancion;
-import java.time.LocalDate;
-import java.util.ArrayList;
 import javax.swing.JOptionPane;
+import ControlMain.ControlAlbum;
+import Logic.Album;
+
+// CAMBIO: excepciones
+import Excepciones.ValidacionException;           // CAMBIO
+import Excepciones.AccesoDatosException;          // CAMBIO
+import Excepciones.RecursoNoEncontradoException;  // CAMBIO
 
 public class ViewAlbum {
 
-    private String valbumNombre;
-    private LocalDate vfechaCreacion;
-    private String vgenero;
-    private int vdescargas;
-    private Artista vartista;
-    private ArrayList<Cancion> vcanciones;
+    private final ControlAlbum control;
 
-    public ViewAlbum() {
-        vcanciones = new ArrayList<>();
+    public ViewAlbum(ControlAlbum control) {
+        this.control = control;
     }
 
-    // ✅ Mensaje de éxito
-    public void mostrarMensajeExito(String mensaje) {
-        JOptionPane.showMessageDialog(null, mensaje, "Éxito", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    // ✅ Mensaje de error simple
-    public void mostrarMensajeError(String mensaje) {
-        JOptionPane.showMessageDialog(null, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
-    }
-
-    // ✅ Manejo de excepciones con detalle
-    public void mostrarError(Exception e) {
-        String tipo = e.getClass().getSimpleName();
-        String detalle = e.getMessage();
-
-        StringBuilder mensaje = new StringBuilder("Ocurrió un error durante la operación.\n\n");
-        mensaje.append("Tipo de error: ").append(tipo).append("\n");
-        mensaje.append("Detalle: ").append(detalle);
-
-        JOptionPane.showMessageDialog(null, mensaje.toString(), "Error", JOptionPane.ERROR_MESSAGE);
-    }
-
-    // ✅ Confirmación para eliminar/modificar
-    public boolean confirmarAccion(String mensaje) {
-        int opcion = JOptionPane.showConfirmDialog(null, mensaje, "Confirmar", JOptionPane.YES_NO_OPTION);
-        return opcion == JOptionPane.YES_OPTION;
-    }
-
-    // ✅ Captura de datos
-    public void capturaAlbumNombre() {
-        do {
-            valbumNombre = JOptionPane.showInputDialog(null, "Digite el nombre del Álbum:", "Álbum", JOptionPane.INFORMATION_MESSAGE);
-        } while (valbumNombre == null || valbumNombre.trim().isEmpty());
-    }
-
-    public void capturaFechaCreacion() {
+    public void crear(Album a) {
         try {
-            int dia = Integer.parseInt(JOptionPane.showInputDialog(null, "Día de creación:", "Fecha", JOptionPane.INFORMATION_MESSAGE));
-            int mes = Integer.parseInt(JOptionPane.showInputDialog(null, "Mes de creación:", "Fecha", JOptionPane.INFORMATION_MESSAGE));
-            int anio = Integer.parseInt(JOptionPane.showInputDialog(null, "Año de creación:", "Fecha", JOptionPane.INFORMATION_MESSAGE));
-            vfechaCreacion = LocalDate.of(anio, mes, dia);
-        } catch (Exception e) {
-            mostrarError(new IllegalArgumentException("Fecha inválida. Se usará la fecha actual."));
-            vfechaCreacion = LocalDate.now();
+            control.crear(a);
+            JOptionPane.showMessageDialog(null, "Álbum insertado.");
+        } catch (ValidacionException e) {
+            JOptionPane.showMessageDialog(null, "Validación: " + e.getMessage());
+        } catch (AccesoDatosException e) {
+            JOptionPane.showMessageDialog(null, "BD: " + e.getMessage());
         }
     }
 
-    public void capturaGenero() {
-        vgenero = JOptionPane.showInputDialog(null, "Digite el género del Álbum:", "Género", JOptionPane.INFORMATION_MESSAGE);
-        if (vgenero == null || vgenero.trim().isEmpty()) {
-            vgenero = "Desconocido";
-        }
-    }
-
-    public void capturaDescargas() {
+    public void buscarPorNombre(String nombre) {
         try {
-            String input = JOptionPane.showInputDialog(null, "Cantidad de descargas:", "Descargas", JOptionPane.INFORMATION_MESSAGE);
-            vdescargas = Integer.parseInt(input);
-        } catch (Exception e) {
-            vdescargas = 0;
+            Album a = control.buscarPorNombre(nombre);
+            JOptionPane.showMessageDialog(null, "Encontrado: " + a.getAlbumNombre());
+        } catch (RecursoNoEncontradoException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage());
+        } catch (AccesoDatosException e) {
+            JOptionPane.showMessageDialog(null, "BD: " + e.getMessage());
         }
     }
 
-    public void capturaArtista() {
-        String nombreArtista = JOptionPane.showInputDialog(null, "Digite el nombre del artista:", "Artista", JOptionPane.INFORMATION_MESSAGE);
-        if (nombreArtista != null && !nombreArtista.trim().isEmpty()) {
-            this.vartista = new Artista(nombreArtista.trim());
-        } else {
-            this.vartista = new Artista("No definido");
+    public void actualizarPorNombre(Album a) {
+        try {
+            int filas = control.actualizarPorNombre(a);
+            JOptionPane.showMessageDialog(null, "Filas afectadas: " + filas);
+        } catch (ValidacionException e) {
+            JOptionPane.showMessageDialog(null, "Validación: " + e.getMessage());
+        } catch (AccesoDatosException e) {
+            JOptionPane.showMessageDialog(null, "BD: " + e.getMessage());
         }
-    }
-
-    public void capturaCanciones() {
-        boolean seguir = true;
-        while (seguir) {
-            String titulo = JOptionPane.showInputDialog(null, "Ingrese el título de la canción:", "Canción del Álbum", JOptionPane.INFORMATION_MESSAGE);
-            if (titulo != null && !titulo.trim().isEmpty()) {
-                Cancion nueva = new Cancion();
-                nueva.setTitulo(titulo.trim());
-                vcanciones.add(nueva);
-            }
-
-            int opcion = JOptionPane.showConfirmDialog(null, "¿Desea agregar otra canción?", "Continuar", JOptionPane.YES_NO_OPTION);
-            if (opcion != JOptionPane.YES_OPTION) {
-                seguir = false;
-            }
-        }
-    }
-
-    // ✅ Mostrar datos del álbum
-    public void mostrarinformacionAlbum() {
-        StringBuilder mensaje = new StringBuilder();
-        mensaje.append("------ ALBUM ------\n");
-        mensaje.append("Álbum: ").append(valbumNombre).append("\n");
-        mensaje.append("Género: ").append(vgenero).append("\n");
-        mensaje.append("Fecha de creación: ").append(vfechaCreacion).append("\n");
-        mensaje.append("Descargas: ").append(vdescargas).append("\n");
-        mensaje.append("Artista: ").append(vartista != null ? vartista.getNombre() : "No definido").append("\n");
-        mensaje.append("Canciones:\n");
-        for (Cancion c : vcanciones) {
-            mensaje.append("- ").append(c.getTitulo()).append("\n");
-        }
-        mensaje.append("--------------------");
-
-        JOptionPane.showMessageDialog(null, mensaje.toString(), "Información del Álbum", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    // ✅ Métodos individuales para mostrar datos
-    public void mostrarAlbumNombre() {
-        JOptionPane.showMessageDialog(null, "Nombre del Álbum: " + getValbumNombre());
-    }
-
-    public void mostrarFechaCreacion() {
-        JOptionPane.showMessageDialog(null, "Fecha de creación: " + getVfechaCreacion());
-    }
-
-    public void mostrarGenero() {
-        JOptionPane.showMessageDialog(null, "Género del Álbum: " + getVgenero());
-    }
-
-    public void mostrarDescargas() {
-        JOptionPane.showMessageDialog(null, "Cantidad de Descargas: " + getVdescargas());
-    }
-
-    public void mostrarArtista() {
-        JOptionPane.showMessageDialog(null, "Artista del Álbum: " + (vartista != null ? vartista.getNombre() : "No definido"));
-    }
-
-    public void mostrarCanciones() {
-        StringBuilder canciones = new StringBuilder("Canciones del álbum:\n");
-        for (Cancion c : vcanciones) {
-            canciones.append("- ").append(c.getTitulo()).append("\n");
-        }
-        JOptionPane.showMessageDialog(null, canciones.toString());
-    }
-
-    // ✅ Getters y Setters
-    public String getValbumNombre() {
-        return valbumNombre;
-    }
-
-    public LocalDate getVfechaCreacion() {
-        return vfechaCreacion;
-    }
-
-    public String getVgenero() {
-        return vgenero;
-    }
-
-    public int getVdescargas() {
-        return vdescargas;
-    }
-
-    public Artista getVartista() {
-        return vartista;
-    }
-
-    public ArrayList<Cancion> getVcanciones() {
-        return vcanciones;
-    }
-
-    public void setValbumNombre(String valbumNombre) {
-        this.valbumNombre = valbumNombre;
-    }
-
-    public void setVfechaCreacion(LocalDate vfechaCreacion) {
-        this.vfechaCreacion = vfechaCreacion;
-    }
-
-    public void setVgenero(String vgenero) {
-        this.vgenero = vgenero;
-    }
-
-    public void setVdescargas(int vdescargas) {
-        this.vdescargas = vdescargas;
-    }
-
-    public void setVartista(Artista vartista) {
-        this.vartista = vartista;
-    }
-
-    public void setVcanciones(ArrayList<Cancion> vcanciones) {
-        this.vcanciones = vcanciones;
     }
 }
