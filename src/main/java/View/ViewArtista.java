@@ -1,45 +1,52 @@
 package View;
 
-import Logic.Artista;
 import javax.swing.JOptionPane;
+import ControlMain.ControlArtista;
+import Logic.Artista;
+
+// CAMBIO: excepciones
+import Excepciones.ValidacionException;           // CAMBIO
+import Excepciones.AccesoDatosException;          // CAMBIO
+import Excepciones.RecursoNoEncontradoException;  // CAMBIO
 
 public class ViewArtista {
 
-    public String pedirNombre() {
-        return JOptionPane.showInputDialog("Ingrese el nombre del artista:");
+    private final ControlArtista control;
+
+    public ViewArtista(ControlArtista control) {
+        this.control = control;
     }
 
-    public String pedirGenero() {
-        return JOptionPane.showInputDialog("Ingrese el género del artista:");
+    public void crearArtista(Artista a) {
+        try {
+            control.crear(a);
+            JOptionPane.showMessageDialog(null, "Artista insertado correctamente.");
+        } catch (ValidacionException e) {
+            JOptionPane.showMessageDialog(null, "Validación: " + e.getMessage());
+        } catch (AccesoDatosException e) {
+            JOptionPane.showMessageDialog(null, "BD: " + e.getMessage());
+        }
     }
 
-    public String pedirPais() {
-        return JOptionPane.showInputDialog("Ingrese el país del artista:");
+    public void buscarPorNombre(String nombre) {
+        try {
+            Artista a = control.buscarPorNombre(nombre);
+            JOptionPane.showMessageDialog(null, "Encontrado: " + a.getNombre());
+        } catch (RecursoNoEncontradoException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage());
+        } catch (AccesoDatosException e) {
+            JOptionPane.showMessageDialog(null, "BD: " + e.getMessage());
+        }
     }
 
-    public void mostrarDatos(Artista artista) {
-        String info = "----- ARTISTA -----\n"
-                + "ID: " + artista.getIdArtista() + "\n"
-                + "Nombre: " + artista.getNombre() + "\n"
-                + "Género: " + artista.getGenero() + "\n"
-                + "País: " + artista.getPais();
-        JOptionPane.showMessageDialog(null, info, "Información del Artista", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    public void mostrarMensajeExito(String mensaje) {
-        JOptionPane.showMessageDialog(null, mensaje, "Éxito", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    public void mostrarMensajeError(String mensaje) {
-        JOptionPane.showMessageDialog(null, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
-    }
-
-    public void mostrarError(Exception e) {
-        JOptionPane.showMessageDialog(null, "Error inesperado: " + e.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-    }
-
-    public boolean confirmarAccion(String mensaje) {
-        int opcion = JOptionPane.showConfirmDialog(null, mensaje, "Confirmar", JOptionPane.YES_NO_OPTION);
-        return opcion == JOptionPane.YES_OPTION;
+    public void actualizarPorNombre(Artista a) {
+        try {
+            int filas = control.actualizarPorNombre(a);
+            JOptionPane.showMessageDialog(null, "Filas afectadas: " + filas);
+        } catch (ValidacionException e) {
+            JOptionPane.showMessageDialog(null, "Validación: " + e.getMessage());
+        } catch (AccesoDatosException e) {
+            JOptionPane.showMessageDialog(null, "BD: " + e.getMessage());
+        }
     }
 }
