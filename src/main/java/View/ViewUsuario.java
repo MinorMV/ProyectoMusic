@@ -1,69 +1,52 @@
 package View;
 
-import Logic.Usuario;
 import javax.swing.JOptionPane;
+import ControlMain.ControlUsuario;
+import Logic.Usuario;
+
+// CAMBIO: imports de excepciones
+import Excepciones.ValidacionException;           // CAMBIO
+import Excepciones.AccesoDatosException;          // CAMBIO
+import Excepciones.RecursoNoEncontradoException;  // CAMBIO
 
 public class ViewUsuario {
 
-    private String vnombre;
-    private String vcorreo;
-    private String vcontrasena;
-    private String vpais;
+    private final ControlUsuario control;
 
-    public void capturaNombre() {
-        vnombre = JOptionPane.showInputDialog(null, "Ingrese el nombre del Usuario:");
+    public ViewUsuario(ControlUsuario control) {
+        this.control = control;
     }
 
-    public void capturaCorreo() {
-        vcorreo = JOptionPane.showInputDialog(null, "Ingrese el correo del Usuario:");
+    public void crearUsuario(Usuario u) {
+        try {
+            control.crear(u); // (tu llamada existente)
+            JOptionPane.showMessageDialog(null, "Usuario registrado correctamente.");
+        } catch (ValidacionException e) { // CAMBIO
+            JOptionPane.showMessageDialog(null, "Error de validación: " + e.getMessage());
+        } catch (AccesoDatosException e) { // CAMBIO
+            JOptionPane.showMessageDialog(null, "Error de base de datos: " + e.getMessage());
+        }
     }
 
-    public void capturaContrasena() {
-        vcontrasena = JOptionPane.showInputDialog(null, "Ingrese la contraseña del Usuario:");
+    public void buscarPorCorreo(String correo) {
+        try {
+            Usuario u = control.buscarPorCorreo(correo); // (tu llamada existente)
+            JOptionPane.showMessageDialog(null, "Encontrado: " + u.getNombre() + " (" + u.getCorreo() + ")");
+        } catch (RecursoNoEncontradoException e) { // CAMBIO
+            JOptionPane.showMessageDialog(null, e.getMessage());
+        } catch (AccesoDatosException e) { // CAMBIO
+            JOptionPane.showMessageDialog(null, "Error de base de datos: " + e.getMessage());
+        }
     }
 
-    public void capturaPais() {
-        vpais = JOptionPane.showInputDialog(null, "Ingrese el país del Usuario:");
-    }
-
-    public void mostrarDatos(Usuario u) {
-        String datos = "----- USUARIO -----\n"
-                + "Nombre: " + u.getNombre() + "\n"
-                + "Correo: " + u.getCorreo() + "\n"
-                + "Contraseña: " + u.getContrasena() + "\n"
-                + "País: " + u.getPais();
-        JOptionPane.showMessageDialog(null, datos, "Datos encontrados", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    public void mostrarMensajeExito(String mensaje) {
-        JOptionPane.showMessageDialog(null, mensaje, "Éxito", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    public void mostrarMensajeError(String mensaje) {
-        JOptionPane.showMessageDialog(null, mensaje, "Error", JOptionPane.ERROR_MESSAGE);
-    }
-
-    public void mostrarError(String mensaje) {
-        JOptionPane.showMessageDialog(null, mensaje, "Error técnico", JOptionPane.ERROR_MESSAGE);
-    }
-
-    public void mostrarMensajeInfo(String msg) {
-        javax.swing.JOptionPane.showMessageDialog(null, msg, "Info", javax.swing.JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    public String getVnombre() {
-        return vnombre;
-    }
-
-    public String getVcorreo() {
-        return vcorreo;
-    }
-
-    public String getVcontrasena() {
-        return vcontrasena;
-    }
-
-    public String getVpais() {
-        return vpais;
+    public void actualizarPorCorreo(Usuario u) {
+        try {
+            int filas = control.actualizarPorCorreo(u); // (tu llamada existente)
+            JOptionPane.showMessageDialog(null, "Filas afectadas: " + filas);
+        } catch (ValidacionException e) { // CAMBIO
+            JOptionPane.showMessageDialog(null, "Error de validación: " + e.getMessage());
+        } catch (AccesoDatosException e) { // CAMBIO
+            JOptionPane.showMessageDialog(null, "Error de base de datos: " + e.getMessage());
+        }
     }
 }
