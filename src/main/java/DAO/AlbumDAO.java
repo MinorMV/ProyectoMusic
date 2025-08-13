@@ -1,141 +1,70 @@
 package DAO;
 
 import Logic.Album;
-import Logic.Artista;
-import Logic.Cancion;
-import java.sql.*;
-import java.util.ArrayList;
-import oracle.jdbc.OracleTypes;
+import java.sql.Connection;
+import java.sql.CallableStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+
+// CAMBIO: excepciones
+import Excepciones.ValidacionException;           // CAMBIO
+import Excepciones.AccesoDatosException;          // CAMBIO
+import Excepciones.RecursoNoEncontradoException;  // CAMBIO
 
 public class AlbumDAO {
 
-    private final Connection conexion;
+    private Connection conexion;
 
     public AlbumDAO(Connection conexion) {
         this.conexion = conexion;
     }
 
-    public void insertarAlbum(Album album) throws SQLException {
-        CallableStatement cs = conexion.prepareCall("{call insertar_album(?, ?, ?, ?, ?)}");
-        cs.setString(1, album.getAlbumNombre());
-        cs.setDate(2, Date.valueOf(album.getFechaCreacion()));
-        cs.setString(3, album.getGenero());
-        cs.setInt(4, album.getDescargas());
-
-        int idArtista = obtenerIdArtistaPorNombre(album.getArtista().getNombre());
-        cs.setInt(5, idArtista);
-        cs.execute();
-        cs.close();
-
-        int idAlbum = obtenerIdAlbumPorNombre(album.getAlbumNombre());
-
-        for (Cancion cancion : album.getCanciones()) {
-            int idCancion = obtenerIdCancionPorTitulo(cancion.getTitulo());
-            insertarRelacionAlbumCancion(idAlbum, idCancion);
+    public void insertarAlbum(Album album) throws ValidacionException, AccesoDatosException { // CAMBIO
+        try {
+            CallableStatement cs = conexion.prepareCall("{ call INSERTAR_ALBUM(?, ?, ?, ?, ?) }");
+            cs.setString(1, album.getAlbumNombre());
+            cs.setDate(2, java.sql.Date.valueOf(album.getFechaCreacion()));
+            cs.setString(3, album.getGenero());
+            cs.setInt(4, album.getDescargas());
+            cs.setInt(5, album.getArtista().getIdArtista()); // ajusta si usas otro campo
+            cs.executeUpdate();
+        } catch (SQLException e) {
+            throw new AccesoDatosException("Error al insertar álbum", e); // CAMBIO
         }
     }
 
-    public Album buscarAlbumPorNombre(String nombre) throws SQLException {
-        CallableStatement cs = conexion.prepareCall("{ ? = call buscar_album(?) }");
-        cs.registerOutParameter(1, OracleTypes.CURSOR);
-        cs.setString(2, nombre);
-        cs.execute();
-
-        ResultSet rs = (ResultSet) cs.getObject(1);
-        if (rs.next()) {
-            Album album = new Album();
-            album.setAlbumNombre(rs.getString("NOMBRE"));
-            album.setFechaCreacion(rs.getDate("FECHA_CREACION").toLocalDate());
-            album.setGenero(rs.getString("GENERO"));
-            album.setDescargas(rs.getInt("DESCARGAS"));
-
-            Artista artista = new Artista();
-            artista.setIdArtista(rs.getInt("ID_ARTISTA"));
-            album.setArtista(artista);
-            return album;
-        } else {
-            return null;
+    public Album buscarAlbumPorNombre(String nombre)
+            throws AccesoDatosException, RecursoNoEncontradoException { // CAMBIO
+        try {
+            CallableStatement cs = conexion.prepareCall("{ call BUSCAR_ALBUM_POR_NOMBRE(?) }");
+            cs.setString(1, nombre);
+            ResultSet rs = cs.executeQuery();
+            if (rs.next()) {
+                Album al = new Album();
+                al.setAlbumNombre(rs.getString("NOMBRE"));
+                al.setGenero(rs.getString("GENERO"));
+                al.setDescargas(rs.getInt("DESCARGAS"));
+                al.setFechaCreacion(rs.getDate("FECHA_CREACION").toLocalDate());
+                return al;
+            } else {
+                throw new RecursoNoEncontradoException("Álbum no encontrado"); // CAMBIO
+            }
+        } catch (SQLException e) {
+            throw new AccesoDatosException("Error al buscar álbum", e); // CAMBIO
         }
     }
 
-    public void modificarAlbum(Album album) throws SQLException {
-        CallableStatement cs = conexion.prepareCall("{call modificar_album(?, ?, ?, ?, ?)}");
-        cs.setString(1, album.getAlbumNombre());
-        cs.setDate(2, Date.valueOf(album.getFechaCreacion()));
-        cs.setString(3, album.getGenero());
-        cs.setInt(4, album.getDescargas());
-
-        int idArtista = obtenerIdArtistaPorNombre(album.getArtista().getNombre());
-        cs.setInt(5, idArtista);
-        cs.execute();
-        cs.close();
-
-        int idAlbum = obtenerIdAlbumPorNombre(album.getAlbumNombre());
-        eliminarRelacionesAlbumCancion(idAlbum);
-        for (Cancion cancion : album.getCanciones()) {
-            int idCancion = obtenerIdCancionPorTitulo(cancion.getTitulo());
-            insertarRelacionAlbumCancion(idAlbum, idCancion);
+    public int modificarAlbumPorNombre(Album album)
+            throws ValidacionException, AccesoDatosException { // CAMBIO
+        try {
+            CallableStatement cs = conexion.prepareCall("{ call MODIFICAR_ALBUM_POR_NOMBRE(?, ?, ?, ?) }");
+            cs.setString(1, album.getAlbumNombre());
+            cs.setDate(2, java.sql.Date.valueOf(album.getFechaCreacion()));
+            cs.setString(3, album.getGenero());
+            cs.setInt(4, album.getDescargas());
+            return cs.executeUpdate();
+        } catch (SQLException e) {
+            throw new AccesoDatosException("Error al modificar álbum", e); // CAMBIO
         }
-    }
-
-    public void eliminarAlbumPorNombre(String nombre) throws SQLException {
-        CallableStatement cs = conexion.prepareCall("{call eliminar_album(?)}");
-        cs.setString(1, nombre);
-        cs.execute();
-        cs.close();
-    }
-
-    private int obtenerIdArtistaPorNombre(String nombre) throws SQLException {
-        String sql = "SELECT ID_ARTISTA FROM ARTISTAS WHERE NOMBRE = ?";
-        PreparedStatement ps = conexion.prepareStatement(sql);
-        ps.setString(1, nombre);
-        ResultSet rs = ps.executeQuery();
-
-        if (rs.next()) {
-            return rs.getInt("ID_ARTISTA");
-        } else {
-            throw new SQLException("Artista no encontrado con nombre: " + nombre);
-        }
-    }
-
-    private int obtenerIdAlbumPorNombre(String nombre) throws SQLException {
-        String sql = "SELECT ID_ALBUM FROM ALBUMES WHERE NOMBRE = ?";
-        PreparedStatement ps = conexion.prepareStatement(sql);
-        ps.setString(1, nombre);
-        ResultSet rs = ps.executeQuery();
-
-        if (rs.next()) {
-            return rs.getInt("ID_ALBUM");
-        } else {
-            throw new SQLException("Álbum no encontrado con nombre: " + nombre);
-        }
-    }
-
-    private int obtenerIdCancionPorTitulo(String titulo) throws SQLException {
-        String sql = "SELECT ID_CANCION FROM CANCIONES WHERE TRIM(UPPER(TITULO)) = TRIM(UPPER(?))";
-        PreparedStatement ps = conexion.prepareStatement(sql);
-        ps.setString(1, titulo);
-        ResultSet rs = ps.executeQuery();
-
-        if (rs.next()) {
-            return rs.getInt("ID_CANCION");
-        } else {
-            throw new SQLException("Canción no encontrada con título: " + titulo);
-        }
-    }
-
-    private void insertarRelacionAlbumCancion(int idAlbum, int idCancion) throws SQLException {
-        String sql = "INSERT INTO ALBUM_CANCION (ID_ALBUM, ID_CANCION) VALUES (?, ?)";
-        PreparedStatement ps = conexion.prepareStatement(sql);
-        ps.setInt(1, idAlbum);
-        ps.setInt(2, idCancion);
-        ps.executeUpdate();
-    }
-
-    private void eliminarRelacionesAlbumCancion(int idAlbum) throws SQLException {
-        String sql = "DELETE FROM ALBUM_CANCION WHERE ID_ALBUM = ?";
-        PreparedStatement ps = conexion.prepareStatement(sql);
-        ps.setInt(1, idAlbum);
-        ps.executeUpdate();
     }
 }
