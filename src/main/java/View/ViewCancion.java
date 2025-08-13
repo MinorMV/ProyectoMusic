@@ -1,63 +1,52 @@
 package View;
 
 import javax.swing.JOptionPane;
+import ControlMain.ControlCancion;
+import Logic.Cancion;
+
+// CAMBIO: excepciones
+import Excepciones.ValidacionException;           // CAMBIO
+import Excepciones.AccesoDatosException;          // CAMBIO
+import Excepciones.RecursoNoEncontradoException;  // CAMBIO
 
 public class ViewCancion {
-    private String vtitulo;
-    private String valbum;
-    private String vduracion;
-    private String vgenero;
-    private String vartista;
 
-    public void capturaTitulo() {
-        vtitulo = JOptionPane.showInputDialog("Ingrese el título de la canción:");
+    private final ControlCancion control;
+
+    public ViewCancion(ControlCancion control) {
+        this.control = control;
     }
 
-    public void capturaAlbum() {
-        valbum = JOptionPane.showInputDialog("Ingrese el nombre del álbum:");
+    public void crear(Cancion c) {
+        try {
+            control.crear(c);
+            JOptionPane.showMessageDialog(null, "Canción insertada.");
+        } catch (ValidacionException e) {
+            JOptionPane.showMessageDialog(null, "Validación: " + e.getMessage());
+        } catch (AccesoDatosException e) {
+            JOptionPane.showMessageDialog(null, "BD: " + e.getMessage());
+        }
     }
 
-    public void capturaDuracion() {
-        vduracion = JOptionPane.showInputDialog("Ingrese la duración (mm:ss):");
+    public void buscarPorNombre(String nombre) {
+        try {
+            Cancion c = control.buscarPorNombre(nombre);
+            JOptionPane.showMessageDialog(null, "Encontrada: " + c.getNombre());
+        } catch (RecursoNoEncontradoException e) {
+            JOptionPane.showMessageDialog(null, e.getMessage());
+        } catch (AccesoDatosException e) {
+            JOptionPane.showMessageDialog(null, "BD: " + e.getMessage());
+        }
     }
 
-    public void capturaGenero() {
-        vgenero = JOptionPane.showInputDialog("Ingrese el género:");
-    }
-
-    public void capturaArtista() {
-        vartista = JOptionPane.showInputDialog("Ingrese el nombre del artista:");
-    }
-
-    public String getTitulo() {
-        return vtitulo;
-    }
-
-    public String getAlbum() {
-        return valbum;
-    }
-
-    public String getDuracion() {
-        return vduracion;
-    }
-
-    public String getGenero() {
-        return vgenero;
-    }
-
-    public String getArtista() {
-        return vartista;
-    }
-
-    public void mostrarMensajeExito(String msg) {
-        JOptionPane.showMessageDialog(null, msg, "Éxito", JOptionPane.INFORMATION_MESSAGE);
-    }
-
-    public void mostrarMensajeError(String msg) {
-        JOptionPane.showMessageDialog(null, msg, "Error", JOptionPane.ERROR_MESSAGE);
-    }
-
-    public boolean confirmarAccion(String mensaje) {
-        return JOptionPane.showConfirmDialog(null, mensaje, "Confirmar", JOptionPane.YES_NO_OPTION) == JOptionPane.YES_OPTION;
+    public void actualizarPorNombre(Cancion c) {
+        try {
+            int filas = control.actualizarPorNombre(c);
+            JOptionPane.showMessageDialog(null, "Filas afectadas: " + filas);
+        } catch (ValidacionException e) {
+            JOptionPane.showMessageDialog(null, "Validación: " + e.getMessage());
+        } catch (AccesoDatosException e) {
+            JOptionPane.showMessageDialog(null, "BD: " + e.getMessage());
+        }
     }
 }
